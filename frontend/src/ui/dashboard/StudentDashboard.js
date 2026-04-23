@@ -1,12 +1,28 @@
 import CampusHeader from "../CampusHeader";
 import InfoCard from "./InfoCard";
-import CampusMapView from "../resources/CampusMapView";
-import ResourceBrowser from "../resources/ResourceBrowser";
+import StudentResourcesPage from "./StudentResourcesPage";
 
-function StudentDashboard({ user, onLogout }) {
+function StudentDashboard({ user, onLogout, onNavigate, path }) {
+  if (path === "/student/resources") {
+    return (
+      <StudentResourcesPage
+        onBack={() => onNavigate("/student/dashboard")}
+        onLogout={onLogout}
+        onNavigate={onNavigate}
+        user={user}
+      />
+    );
+  }
+
+  const handleHeaderNavigate = (item) => {
+    if (item === "Resources") {
+      onNavigate("/student/resources");
+    }
+  };
+
   return (
     <main className="auth-shell min-h-screen text-campus-ink">
-      <CampusHeader active="Resources" onLogout={onLogout} user={user} />
+      <CampusHeader active="Home" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
       <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div className="rounded-[2rem] bg-white p-7 shadow-panel sm:p-10">
@@ -14,11 +30,11 @@ function StudentDashboard({ user, onLogout }) {
               Student Workspace
             </p>
             <h1 className="serif-display mt-5 text-5xl font-black leading-tight text-campus-navy">
-              Find campus spaces with real availability.
+              Student dashboard
             </h1>
             <p className="mt-5 text-lg leading-8 text-slate-600">
-              Search lecture halls, labs, meeting rooms, and equipment before planning your next
-              class activity or group work.
+              View your account details and open the resource catalogue when you need to find
+              rooms, labs, meeting spaces, or equipment.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <span className="rounded-full bg-campus-navy px-5 py-3 text-sm font-black text-white">
@@ -28,18 +44,26 @@ function StudentDashboard({ user, onLogout }) {
                 {user.faculty}
               </span>
             </div>
+            <button
+              className="primary-action mt-7 min-h-12 rounded-md px-6 text-sm font-black text-white transition hover:scale-[1.01]"
+              onClick={() => onNavigate("/student/resources")}
+              type="button"
+            >
+              Resources
+            </button>
           </div>
 
           <div className="blue-hero rounded-[2rem] p-6 text-white shadow-panel sm:p-8">
-            <h2 className="text-3xl font-black">Resource discovery</h2>
+            <h2 className="text-3xl font-black">My campus profile</h2>
             <p className="mt-3 max-w-xl text-sm leading-6 text-white/80">
-              Use filters to compare capacity, location, status, and available time windows.
+              Keep your student information visible here while resource browsing stays on its own
+              focused page.
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <InfoTile title="Catalogue" value="Rooms and equipment" />
-              <InfoTile title="Availability" value="Date and time windows" />
-              <InfoTile title="Status" value="Active or out of service" />
-              <InfoTile title="Profile" value={user.email} />
+              <InfoTile title="Student ID" value={user.registrationNumber} />
+              <InfoTile title="Faculty" value={user.faculty} />
+              <InfoTile title="Email" value={user.email} />
+              <InfoTile title="Status" value="Active account" />
             </div>
           </div>
         </div>
@@ -49,9 +73,6 @@ function StudentDashboard({ user, onLogout }) {
           <InfoCard label="Role" value="Student" />
           <InfoCard label="Access" value="Facilities and asset bookings" />
         </div>
-
-        <CampusMapView />
-        <ResourceBrowser />
       </section>
     </main>
   );

@@ -4,7 +4,7 @@ import TechnicianDashboard from "./dashboard/TechnicianDashboard";
 
 function Dashboard({ user, onLogout, onNavigate, path }) {
   if (user.role === "STUDENT") {
-    return <StudentDashboard onLogout={onLogout} user={user} />;
+    return <StudentDashboard onLogout={onLogout} onNavigate={onNavigate} path={path} user={user} />;
   }
 
   if (user.role === "TECHNICIAN") {
