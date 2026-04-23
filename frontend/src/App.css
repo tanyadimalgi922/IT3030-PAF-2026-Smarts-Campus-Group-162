@@ -1,38 +1,31 @@
-.App {
-  text-align: center;
+.auth-shell {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(14, 124, 123, 0.18), transparent 28%),
+    radial-gradient(circle at 85% 10%, rgba(244, 185, 66, 0.18), transparent 24%),
+    linear-gradient(135deg, #f6f8fb 0%, #e9f3f1 48%, #f7efe5 100%);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.field-label {
+  color: #173b57;
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.field-input {
+  background: #ffffff;
+  border: 1px solid #d7e1e8;
+  border-radius: 0.5rem;
+  color: #102033;
+  font-size: 0.95rem;
+  outline: none;
+  padding: 0.72rem 0.85rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  width: 100%;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.field-input:focus {
+  border-color: #0e7c7b;
+  box-shadow: 0 0 0 4px rgba(14, 124, 123, 0.12);
 }
