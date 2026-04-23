@@ -29,6 +29,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
   const [technicians, setTechnicians] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [statusFilter, setStatusFilter] = useState("");
+  const [selectedTicketId, setSelectedTicketId] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingMeta, setLoadingMeta] = useState(false);
   const [error, setError] = useState("");
@@ -153,6 +154,18 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
       active = false;
     };
   }, [mode, statusFilter, user.id]);
+
+  useEffect(() => {
+    if (!tickets.length) {
+      setSelectedTicketId("");
+      return;
+    }
+
+    const hasSelectedTicket = tickets.some((ticket) => ticket.id === selectedTicketId);
+    if (!hasSelectedTicket) {
+      setSelectedTicketId(tickets[0].id);
+    }
+  }, [selectedTicketId, tickets]);
 
   const refreshTickets = async () => {
     setLoading(true);
@@ -325,6 +338,9 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
   };
 
   const filteredResources = resources.filter((resource) => resource.status === "ACTIVE");
+  const selectedTicket = mode === "technician"
+    ? tickets.find((ticket) => ticket.id === selectedTicketId) || null
+    : null;
   const pageTitle = mode === "student"
     ? "Report incidents for campus resources."
     : mode === "admin"
@@ -469,18 +485,43 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
             {mode === "student" ? "My incidents" : mode === "admin" ? "All incident tickets" : "Assigned incidents"}
           </h2>
         </div>
-        <select
-          className="field-input sm:max-w-56"
-          onChange={(event) => setStatusFilter(event.target.value)}
-          value={statusFilter}
-        >
-          <option value="">All statuses</option>
-          {["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED"].map((status) => (
-            <option key={status} value={status}>
-              {formatLabel(status)}
-            </option>
-          ))}
-        </select>
+        {mode === "technician" ? (
+          <div className="flex flex-wrap gap-2">
+            {[
+              { value: "", label: "All" },
+              { value: "OPEN", label: "Open" },
+              { value: "IN_PROGRESS", label: "In Progress" },
+              { value: "RESOLVED", label: "Resolved" },
+              { value: "CLOSED", label: "Closed" },
+            ].map((tab) => (
+              <button
+                key={tab.value || "all"}
+                className={`min-h-11 rounded-full px-4 text-sm font-black transition ${
+                  statusFilter === tab.value
+                    ? "bg-campus-navy text-white shadow-sm"
+                    : "border border-blue-100 bg-white text-campus-navy hover:border-campus-blue"
+                }`}
+                onClick={() => setStatusFilter(tab.value)}
+                type="button"
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <select
+            className="field-input sm:max-w-56"
+            onChange={(event) => setStatusFilter(event.target.value)}
+            value={statusFilter}
+          >
+            <option value="">All statuses</option>
+            {["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED", "REJECTED"].map((status) => (
+              <option key={status} value={status}>
+                {formatLabel(status)}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {error && (
@@ -495,6 +536,157 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
         </div>
       )}
 
+      {mode === "technician" ? (
+        <div className="mt-5">
+          {loading ? (
+            <div className="rounded-[2rem] border border-blue-100 bg-white p-6 text-sm font-bold text-campus-blue shadow-sm">
+              Loading incident tickets...
+            </div>
+          ) : tickets.length > 0 ? (
+            <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
+              <section className="rounded-[2rem] border border-blue-100 bg-white p-4 shadow-sm sm:p-5">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-campus-blue">
+                  Basic Details
+                </p>
+                <div className="mt-4 grid gap-3">
+                  {tickets.map((ticket) => (
+                    <button
+                      key={ticket.id}
+                      className={`rounded-2xl border p-4 text-left transition ${
+                        selectedTicketId === ticket.id
+                          ? "border-campus-blue bg-[#f8fbff] shadow-sm"
+                          : "border-slate-200 bg-white hover:border-campus-blue hover:bg-[#fbfdff]"
+                      }`}
+                      onClick={() => setSelectedTicketId(ticket.id)}
+                      type="button"
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${statusTone(ticket.status)}`}>
+                          {formatLabel(ticket.status)}
+                        </span>
+                        <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] ${priorityTone(ticket.priority)}`}>
+                          {formatLabel(ticket.priority)}
+                        </span>
+                      </div>
+                      <h3 className="mt-3 text-lg font-black text-campus-navy">{ticket.resourceName}</h3>
+                      <p className="mt-1 text-sm font-semibold text-slate-600">{ticket.category}</p>
+                      <div className="mt-3 grid gap-1 text-xs font-semibold text-slate-600">
+                        <p>Reported by: {ticket.createdByUserName}</p>
+                        <p>Location: {ticket.resourceLocation}</p>
+                        <p>Created: {formatDateTime(ticket.createdAt)}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rounded-[2rem] border border-blue-100 bg-white p-5 shadow-sm sm:p-6">
+                {selectedTicket ? (
+                  <>
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] ${statusTone(selectedTicket.status)}`}>
+                            {formatLabel(selectedTicket.status)}
+                          </span>
+                          <span className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] ${priorityTone(selectedTicket.priority)}`}>
+                            {formatLabel(selectedTicket.priority)}
+                          </span>
+                        </div>
+                        <h3 className="mt-4 text-3xl font-black text-campus-navy">{selectedTicket.resourceName}</h3>
+                        <p className="mt-2 text-sm font-semibold text-slate-600">
+                          {selectedTicket.resourceLocation}
+                          {selectedTicket.resourceBuilding ? ` • ${selectedTicket.resourceBuilding}` : ""}
+                          {selectedTicket.resourceFloor ? ` • ${selectedTicket.resourceFloor}` : ""}
+                          {selectedTicket.resourceRoomNumber ? ` • ${selectedTicket.resourceRoomNumber}` : ""}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-slate-100 bg-[#f8fbff] p-4 text-sm text-slate-700 lg:min-w-72">
+                        <InfoRow label="Category" value={selectedTicket.category} />
+                        <InfoRow label="Reported by" value={selectedTicket.createdByUserName} />
+                        <InfoRow label="Contact" value={selectedTicket.preferredContactDetails} />
+                        <InfoRow label="Assigned" value={selectedTicket.assignedTechnicianName || "Not assigned"} />
+                        <InfoRow label="Created" value={formatDateTime(selectedTicket.createdAt)} />
+                      </div>
+                    </div>
+
+                    <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Issue Description</p>
+                      <p className="mt-3 text-sm leading-7 text-slate-700">{selectedTicket.description}</p>
+                    </div>
+
+                    {selectedTicket.imageAttachments?.length > 0 && (
+                      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                        {selectedTicket.imageAttachments.map((image, index) => (
+                          <img
+                            alt={`Ticket attachment ${index + 1}`}
+                            className="h-36 w-full rounded-2xl object-cover"
+                            key={`${selectedTicket.id}-img-${index}`}
+                            src={image}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {(selectedTicket.rejectionReason || selectedTicket.resolutionNotes) && (
+                      <div className="mt-5 grid gap-3 md:grid-cols-2">
+                        {selectedTicket.rejectionReason && (
+                          <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
+                            <p className="text-xs font-black uppercase tracking-[0.16em] text-red-700">Rejection reason</p>
+                            <p className="mt-2 text-sm leading-6 text-red-900">{selectedTicket.rejectionReason}</p>
+                          </div>
+                        )}
+                        {selectedTicket.resolutionNotes && (
+                          <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+                            <p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-700">Resolution notes</p>
+                            <p className="mt-2 text-sm leading-6 text-emerald-900">{selectedTicket.resolutionNotes}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="mt-5">
+                      <StatusEditor
+                        disabled={ticketActionId === selectedTicket.id}
+                        form={statusForms[selectedTicket.id] || { status: "", resolutionNotes: "", rejectionReason: "" }}
+                        mode="technician"
+                        onChange={(field, value) =>
+                          setStatusForms((current) => ({
+                            ...current,
+                            [selectedTicket.id]: { ...current[selectedTicket.id], [field]: value },
+                          }))
+                        }
+                        onSubmit={() => handleStatusUpdate(selectedTicket.id)}
+                        ticket={selectedTicket}
+                      />
+                    </div>
+
+                    <TicketCommentsSection
+                      commentEditMap={commentEditMap}
+                      commentInputMap={commentInputMap}
+                      editingCommentId={editingCommentId}
+                      handleCommentDelete={handleCommentDelete}
+                      handleCommentSave={handleCommentSave}
+                      handleCommentSubmit={handleCommentSubmit}
+                      setCommentEditMap={setCommentEditMap}
+                      setCommentInputMap={setCommentInputMap}
+                      setDraftComment={setDraftComment}
+                      setEditingCommentId={setEditingCommentId}
+                      ticket={selectedTicket}
+                      ticketActionId={ticketActionId}
+                      user={user}
+                    />
+                  </>
+                ) : null}
+              </section>
+            </div>
+          ) : (
+            <div className="rounded-[2rem] border border-blue-100 bg-white p-6 text-sm font-bold text-slate-600 shadow-sm">
+              No tickets are currently assigned to you.
+            </div>
+          )}
+        </div>
+      ) : (
       <div className="mt-5 grid gap-4">
         {loading ? (
           <div className="rounded-[2rem] border border-blue-100 bg-white p-6 text-sm font-bold text-campus-blue shadow-sm">
@@ -622,118 +814,21 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
                 </div>
               )}
 
-              <section className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Comments</p>
-                  <span className="text-xs font-bold text-slate-500">
-                    Owners can edit or delete their own comments
-                  </span>
-                </div>
-
-                <div className="mt-3 grid gap-3">
-                  {ticket.comments?.length > 0 ? (
-                    ticket.comments.map((comment) => {
-                      const canManage = comment.authorId === user.id || user.role === "ADMIN";
-                      const isEditing = editingCommentId === comment.id;
-
-                      return (
-                        <div className="rounded-2xl bg-white p-4 shadow-sm" key={comment.id}>
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
-                              <p className="text-sm font-black text-campus-navy">
-                                {comment.authorName}
-                                <span className="ml-2 rounded-full bg-slate-100 px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-slate-600">
-                                  {formatLabel(comment.authorRole)}
-                                </span>
-                              </p>
-                              <p className="mt-1 text-xs font-semibold text-slate-500">
-                                {formatDateTime(comment.updatedAt || comment.createdAt)}
-                              </p>
-                            </div>
-                            {canManage && (
-                              <div className="flex gap-2">
-                                <button
-                                  className="rounded-full border border-blue-100 px-3 py-2 text-xs font-black text-campus-blue"
-                                  onClick={() => {
-                                    setEditingCommentId(comment.id);
-                                    setDraftComment(comment.message);
-                                    setCommentEditMap((current) => ({ ...current, [comment.id]: comment.message }));
-                                  }}
-                                  type="button"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  className="rounded-full border border-red-100 px-3 py-2 text-xs font-black text-red-700"
-                                  onClick={() => handleCommentDelete(ticket.id, comment.id)}
-                                  type="button"
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            )}
-                          </div>
-
-                          {isEditing ? (
-                            <div className="mt-3">
-                              <textarea
-                                className="field-input min-h-24"
-                                onChange={(event) => {
-                                  setDraftComment(event.target.value);
-                                  setCommentEditMap((current) => ({ ...current, [comment.id]: event.target.value }));
-                                }}
-                                value={commentEditMap[comment.id] ?? draftComment}
-                              />
-                              <div className="mt-3 flex gap-2">
-                                <button
-                                  className="primary-action min-h-10 rounded-2xl px-4 text-xs font-black text-white"
-                                  onClick={() => handleCommentSave(ticket.id, comment.id)}
-                                  type="button"
-                                >
-                                  Save
-                                </button>
-                                <button
-                                  className="min-h-10 rounded-2xl border border-slate-200 px-4 text-xs font-black text-slate-600"
-                                  onClick={() => {
-                                    setEditingCommentId("");
-                                    setDraftComment("");
-                                  }}
-                                  type="button"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <p className="mt-3 text-sm leading-7 text-slate-700">{comment.message}</p>
-                          )}
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="rounded-2xl bg-white p-4 text-sm font-semibold text-slate-500 shadow-sm">
-                      No comments yet.
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-4">
-                  <textarea
-                    className="field-input min-h-24"
-                    onChange={(event) => setCommentInputMap((current) => ({ ...current, [ticket.id]: event.target.value }))}
-                    placeholder="Add a comment to this ticket"
-                    value={commentInputMap[ticket.id] || ""}
-                  />
-                  <button
-                    className="primary-action mt-3 min-h-10 rounded-2xl px-4 text-xs font-black text-white disabled:opacity-60"
-                    disabled={ticketActionId === ticket.id || !(commentInputMap[ticket.id] || "").trim()}
-                    onClick={() => handleCommentSubmit(ticket.id)}
-                    type="button"
-                  >
-                    Add Comment
-                  </button>
-                </div>
-              </section>
+              <TicketCommentsSection
+                commentEditMap={commentEditMap}
+                commentInputMap={commentInputMap}
+                editingCommentId={editingCommentId}
+                handleCommentDelete={handleCommentDelete}
+                handleCommentSave={handleCommentSave}
+                handleCommentSubmit={handleCommentSubmit}
+                setCommentEditMap={setCommentEditMap}
+                setCommentInputMap={setCommentInputMap}
+                setDraftComment={setDraftComment}
+                setEditingCommentId={setEditingCommentId}
+                ticket={ticket}
+                ticketActionId={ticketActionId}
+                user={user}
+              />
             </article>
           ))
         ) : (
@@ -745,6 +840,138 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
                 : "No tickets are currently assigned to you."}
           </div>
         )}
+      </div>
+      )}
+    </section>
+  );
+}
+
+function TicketCommentsSection({
+  commentEditMap,
+  commentInputMap,
+  editingCommentId,
+  handleCommentDelete,
+  handleCommentSave,
+  handleCommentSubmit,
+  setCommentEditMap,
+  setCommentInputMap,
+  setDraftComment,
+  setEditingCommentId,
+  ticket,
+  ticketActionId,
+  user,
+}) {
+  return (
+    <section className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Comments</p>
+        <span className="text-xs font-bold text-slate-500">
+          Owners can edit or delete their own comments
+        </span>
+      </div>
+
+      <div className="mt-3 grid gap-3">
+        {ticket.comments?.length > 0 ? (
+          ticket.comments.map((comment) => {
+            const canManage = comment.authorId === user.id || user.role === "ADMIN";
+            const isEditing = editingCommentId === comment.id;
+
+            return (
+              <div className="rounded-2xl bg-white p-4 shadow-sm" key={comment.id}>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-sm font-black text-campus-navy">
+                      {comment.authorName}
+                      <span className="ml-2 rounded-full bg-slate-100 px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-slate-600">
+                        {formatLabel(comment.authorRole)}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-slate-500">
+                      {formatDateTime(comment.updatedAt || comment.createdAt)}
+                    </p>
+                  </div>
+                  {canManage && (
+                    <div className="flex gap-2">
+                      <button
+                        className="rounded-full border border-blue-100 px-3 py-2 text-xs font-black text-campus-blue"
+                        onClick={() => {
+                          setEditingCommentId(comment.id);
+                          setDraftComment(comment.message);
+                          setCommentEditMap((current) => ({ ...current, [comment.id]: comment.message }));
+                        }}
+                        type="button"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="rounded-full border border-red-100 px-3 py-2 text-xs font-black text-red-700"
+                        onClick={() => handleCommentDelete(ticket.id, comment.id)}
+                        type="button"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {isEditing ? (
+                  <div className="mt-3">
+                    <textarea
+                      className="field-input min-h-24"
+                      onChange={(event) => {
+                        setDraftComment(event.target.value);
+                        setCommentEditMap((current) => ({ ...current, [comment.id]: event.target.value }));
+                      }}
+                      value={commentEditMap[comment.id] ?? comment.message}
+                    />
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        className="primary-action min-h-10 rounded-2xl px-4 text-xs font-black text-white"
+                        onClick={() => handleCommentSave(ticket.id, comment.id)}
+                        type="button"
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="min-h-10 rounded-2xl border border-slate-200 px-4 text-xs font-black text-slate-600"
+                        onClick={() => {
+                          setEditingCommentId("");
+                          setDraftComment("");
+                        }}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm leading-7 text-slate-700">{comment.message}</p>
+                )}
+              </div>
+            );
+          })
+        ) : (
+          <div className="rounded-2xl bg-white p-4 text-sm font-semibold text-slate-500 shadow-sm">
+            No comments yet.
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4">
+        <textarea
+          className="field-input min-h-24"
+          onChange={(event) => setCommentInputMap((current) => ({ ...current, [ticket.id]: event.target.value }))}
+          placeholder="Add a comment to this ticket"
+          value={commentInputMap[ticket.id] || ""}
+        />
+        <button
+          className="primary-action mt-3 min-h-10 rounded-2xl px-4 text-xs font-black text-white disabled:opacity-60"
+          disabled={ticketActionId === ticket.id || !(commentInputMap[ticket.id] || "").trim()}
+          onClick={() => handleCommentSubmit(ticket.id)}
+          type="button"
+        >
+          Add Comment
+        </button>
       </div>
     </section>
   );
