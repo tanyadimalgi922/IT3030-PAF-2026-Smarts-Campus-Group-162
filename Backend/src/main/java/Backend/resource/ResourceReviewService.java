@@ -35,7 +35,7 @@ public class ResourceReviewService {
                 .orElseThrow(() -> new IllegalArgumentException("Approved booking not found."));
 
         if (reviewRepository.existsByBookingId(request.bookingId())) {
-            throw new IllegalArgumentException("This approved booking has already been reviewed.");
+            throw new IllegalArgumentException("This booking review is already submitted. You can review this resource again after a new approved booking.");
         }
 
         if (booking.getStatus() != BookingStatus.APPROVED) {
