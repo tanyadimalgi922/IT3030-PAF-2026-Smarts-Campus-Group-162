@@ -2,17 +2,24 @@ import React from "react";
 import "./App.css";
 import AuthPage from "./ui/AuthPage";
 import Dashboard from "./ui/Dashboard";
+import AboutPage from "./ui/public/AboutPage";
+import HomePage from "./ui/public/HomePage";
 
 const routes = {
+  home: "/",
+  about: "/about",
   login: "/login",
   studentRegister: "/register/student",
   technicianRegister: "/register/technician",
   studentDashboard: "/student/dashboard",
   studentResources: "/student/resources",
   studentBookings: "/student/bookings",
+  studentTickets: "/student/tickets",
   technicianDashboard: "/technician/dashboard",
+  technicianTickets: "/technician/tickets",
   adminDashboard: "/admin/dashboard",
   adminBookings: "/admin/bookings",
+  adminIncidents: "/admin/incidents",
   adminCreateResource: "/admin/resources/create",
   adminEditResource: "/admin/resources/edit",
 };
@@ -52,6 +59,14 @@ function App() {
     return <Dashboard onLogout={handleLogout} onNavigate={navigate} path={path} user={currentUser} />;
   }
 
+  if (path === routes.home) {
+    return <HomePage onLogout={handleLogout} onNavigate={navigate} user={currentUser} />;
+  }
+
+  if (path === routes.about) {
+    return <AboutPage onLogout={handleLogout} onNavigate={navigate} user={currentUser} />;
+  }
+
   return (
     <AuthPage
       initialTab={getAuthTab(path)}
@@ -78,7 +93,7 @@ function usePath() {
 }
 
 function normalizePath(path) {
-  return path && path !== "/" ? path : routes.login;
+  return path || routes.home;
 }
 
 function getAuthTab(path) {
@@ -88,6 +103,8 @@ function getAuthTab(path) {
 }
 
 function getAuthPath(tab) {
+  if (tab === "home") return routes.home;
+  if (tab === "about") return routes.about;
   if (tab === "student") return routes.studentRegister;
   if (tab === "technician") return routes.technicianRegister;
   return routes.login;
@@ -104,11 +121,16 @@ function isDashboardPath(path) {
     routes.studentDashboard,
     routes.studentResources,
     routes.studentBookings,
+    routes.studentTickets,
     routes.technicianDashboard,
+    routes.technicianTickets,
     routes.adminDashboard,
     routes.adminBookings,
+    routes.adminIncidents,
     routes.adminCreateResource,
-  ].includes(path) || path.startsWith(`${routes.adminEditResource}/`);
+  ].includes(path)
+    || path.startsWith(`${routes.studentTickets}/create/`)
+    || path.startsWith(`${routes.adminEditResource}/`);
 }
 
 function getStoredUser() {

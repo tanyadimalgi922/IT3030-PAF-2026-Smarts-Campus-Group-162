@@ -8,7 +8,7 @@ function Dashboard({ user, onLogout, onNavigate, path }) {
   }
 
   if (user.role === "TECHNICIAN") {
-    return <TechnicianDashboard onLogout={onLogout} user={user} />;
+    return <TechnicianDashboard onLogout={onLogout} onNavigate={onNavigate} path={path} user={user} />;
   }
 
   return <AdminDashboard onLogout={onLogout} onNavigate={onNavigate} path={path} user={user} />;

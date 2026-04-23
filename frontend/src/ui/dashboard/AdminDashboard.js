@@ -1,18 +1,44 @@
 import CampusHeader from "../CampusHeader";
+import CampusFooter from "../CampusFooter";
 import InfoCard from "./InfoCard";
 import ResourceTypeChart from "./ResourceTypeChart";
 import AdminResourceManager from "../resources/AdminResourceManager";
 import ResourceCreatePage from "../resources/ResourceCreatePage";
 import AdminBookingManager from "../bookings/AdminBookingManager";
+import IncidentTicketsPage from "../incidents/IncidentTicketsPage";
 
 function AdminDashboard({ user, onLogout, onNavigate, path }) {
   const editMatch = path.match(/^\/admin\/resources\/edit\/(.+)$/);
+  const handleHeaderNavigate = (item) => {
+    if (item === "Home") {
+      onNavigate("/");
+      return;
+    }
+
+    if (item === "Dashboard") {
+      onNavigate("/admin/dashboard");
+      return;
+    }
+
+    if (item === "About Us") {
+      onNavigate("/about");
+      return;
+    }
+
+    if (item === "Resources") {
+      onNavigate("/admin/resources/create");
+      return;
+    }
+
+    onNavigate("/admin/dashboard");
+  };
 
   if (path === "/admin/resources/create" || editMatch) {
     return (
       <ResourceCreatePage
         onBack={() => onNavigate("/admin/dashboard")}
         onLogout={onLogout}
+        onNavigate={onNavigate}
         resourceId={editMatch?.[1]}
         user={user}
       />
@@ -21,9 +47,9 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
 
   if (path === "/admin/bookings") {
     return (
-      <main className="auth-shell min-h-screen text-campus-ink">
-        <CampusHeader active="Home" onLogout={onLogout} user={user} />
-        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+      <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
+        <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+        <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
           <div className="dark-hero rounded-[2rem] p-6 text-white shadow-panel sm:p-9">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -49,14 +75,27 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
 
           <AdminBookingManager user={user} />
         </section>
+        <CampusFooter onNavigate={onNavigate} user={user} />
+      </main>
+    );
+  }
+
+  if (path === "/admin/incidents") {
+    return (
+      <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
+        <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+        <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
+          <IncidentTicketsPage mode="admin" onBack={() => onNavigate("/admin/dashboard")} user={user} />
+        </section>
+        <CampusFooter onNavigate={onNavigate} user={user} />
       </main>
     );
   }
 
   return (
-    <main className="auth-shell min-h-screen text-campus-ink">
-      <CampusHeader active="Home" onLogout={onLogout} user={user} />
-      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+    <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
+      <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+      <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
         <div className="dark-hero rounded-[2rem] p-6 text-white shadow-panel sm:p-9">
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-start">
             <div>
@@ -110,13 +149,14 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
               {[
                 ["Resources", () => onNavigate("/admin/resources/create")],
                 ["Bookings", () => onNavigate("/admin/bookings")],
+                ["Incidents", () => onNavigate("/admin/incidents")],
                 ["Reports", null],
                 ["Support", null],
               ].map(([label, action]) => (
                 <button
                   key={label}
                   className={`min-h-20 rounded-2xl border border-white/20 px-4 text-sm font-black transition ${
-                    ["Resources", "Bookings"].includes(label) ? "bg-white text-campus-navy" : "bg-white/8 text-white hover:bg-white/14"
+                    ["Resources", "Bookings", "Incidents"].includes(label) ? "bg-white text-campus-navy" : "bg-white/8 text-white hover:bg-white/14"
                   }`}
                   onClick={action || undefined}
                   type="button"
@@ -131,7 +171,7 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <InfoCard label="Admin name" value={user.fullName} />
           <InfoCard label="System area" value={user.specialization} />
-          <InfoCard label="Workspace" value="Resources, bookings, and incidents" />
+          <InfoCard label="Workspace" value="Resources, bookings, incident routing" />
         </div>
 
         <ResourceTypeChart />
@@ -140,6 +180,7 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
           onEdit={(resourceId) => onNavigate(`/admin/resources/edit/${resourceId}`)}
         />
       </section>
+      <CampusFooter onNavigate={onNavigate} user={user} />
     </main>
   );
 }

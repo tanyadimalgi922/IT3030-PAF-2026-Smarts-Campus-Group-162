@@ -14,7 +14,7 @@ const resourceTypes = [
 const buildings = ["", "Main Academic Block", "Science Complex", "Engineering Block", "Library Building", "Sports Center"];
 const floors = ["", "Ground Floor", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"];
 
-function ResourceBrowser({ adminMode = false, bookingMode = false, onBooked, onEdit, refreshKey = 0, user }) {
+function ResourceBrowser({ adminMode = false, bookingMode = false, onBooked, onEdit, onReportIncident, refreshKey = 0, user }) {
   const [filters, setFilters] = useState({
     search: "",
     type: "",
@@ -197,6 +197,7 @@ function ResourceBrowser({ adminMode = false, bookingMode = false, onBooked, onE
               onReviewSubmitted={() => setLocalRefreshKey((current) => current + 1)}
               onDelete={() => handleDelete(resource)}
               onEdit={() => onEdit?.(resource.id)}
+              onReportIncident={() => onReportIncident?.(resource.id)}
               reviewEligibleBooking={approvedBookingMap[resource.id]}
               resource={resource}
               userHasReviewed={Boolean(reviewedResourceIds[resource.id])}

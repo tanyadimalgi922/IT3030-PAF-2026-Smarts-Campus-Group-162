@@ -1,4 +1,6 @@
 function CampusHeader({ active = "Home", onLogout, onNavigate, user }) {
+  const navItems = user ? ["Home", "Dashboard", "About Us", "Resources"] : ["Home", "About Us", "Resources"];
+
   return (
     <header className="campus-header sticky top-0 z-20 px-5 py-4 text-white sm:px-8 lg:px-12">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -18,7 +20,7 @@ function CampusHeader({ active = "Home", onLogout, onNavigate, user }) {
 
         <nav className="flex w-full justify-center lg:w-auto">
           <div className="flex rounded-full border border-white/10 bg-white/8 p-1 text-sm font-bold text-white/80">
-            {["Home", "About Us", "Resources"].map((item) => (
+            {navItems.map((item) => (
               <button
                 key={item}
                 className={`min-h-10 rounded-full px-5 transition ${

@@ -8,6 +8,7 @@ function ResourceCard({
   onBooked,
   onDelete,
   onEdit,
+  onReportIncident,
   onReviewSubmitted,
   resource,
   reviewEligibleBooking,
@@ -203,6 +204,13 @@ function ResourceCard({
                 {canReview ? "Add Review" : userHasReviewed ? "Reviewed" : "Add Review"}
               </button>
             </div>
+            <button
+              className="mt-2 min-h-10 w-full rounded-md border border-red-200 bg-red-50 px-3 text-xs font-black text-red-700 transition hover:bg-red-100"
+              onClick={onReportIncident}
+              type="button"
+            >
+              Report Incident
+            </button>
             {bookingOpen && (
               <StudentBookingPanel
                 onBooked={() => {

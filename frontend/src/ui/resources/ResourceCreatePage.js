@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createResource, getResource, updateResource } from "../../api/resourceApi";
+import CampusFooter from "../CampusFooter";
 import CampusHeader from "../CampusHeader";
 import Field from "../Field";
 
@@ -22,7 +23,7 @@ const initialForm = {
   availabilityWindows: [{ startDate: "", endDate: "", startTime: "", endTime: "" }],
 };
 
-function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
+function ResourceCreatePage({ onBack, onLogout, onNavigate, resourceId, user }) {
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState({ tone: "idle", message: "" });
   const [saving, setSaving] = useState(false);
@@ -30,6 +31,29 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
   const isEditMode = Boolean(resourceId);
   const today = getTodayDate();
   const isEquipment = form.type === "EQUIPMENT";
+  const handleHeaderNavigate = (item) => {
+    if (item === "Home") {
+      onNavigate?.("/");
+      return;
+    }
+
+    if (item === "Dashboard") {
+      onNavigate?.("/admin/dashboard");
+      return;
+    }
+
+    if (item === "About Us") {
+      onNavigate?.("/about");
+      return;
+    }
+
+    if (item === "Resources") {
+      onNavigate?.("/admin/resources/create");
+      return;
+    }
+
+    onNavigate?.("/admin/dashboard");
+  };
 
   useEffect(() => {
     let active = true;
@@ -170,9 +194,9 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
   };
 
   return (
-    <main className="auth-shell min-h-screen text-campus-ink">
-      <CampusHeader active="Resources" onLogout={onLogout} user={user} />
-      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+    <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
+      <CampusHeader active="Resources" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+      <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
         <div className="dark-hero rounded-[2rem] p-7 text-white shadow-panel sm:p-10">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -444,6 +468,7 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
       </form>
       )}
       </section>
+      <CampusFooter onNavigate={onNavigate} user={user} />
     </main>
   );
 }
