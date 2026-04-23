@@ -3,6 +3,7 @@ package Backend.resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,6 +17,9 @@ public class ResourceService {
     }
 
     public CampusResource create(CampusResource resource) {
+        if (resource.getCreatedAt() == null) {
+            resource.setCreatedAt(Instant.now());
+        }
         return campusResourceRepository.save(resource);
     }
 
@@ -25,7 +29,10 @@ public class ResourceService {
                 .filter(resource -> type == null || resource.getType() == type)
                 .filter(resource -> matchesLocation(resource, location))
                 .filter(resource -> minCapacity == null || resource.getCapacity() >= minCapacity)
-                .sorted(Comparator.comparing(CampusResource::getCreatedAt).reversed())
+                .sorted(Comparator.comparing(
+                        CampusResource::getCreatedAt,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                ).reversed())
                 .toList();
     }
 
@@ -35,9 +42,9 @@ public class ResourceService {
         }
 
         String normalized = search.toLowerCase();
-        return resource.getName().toLowerCase().contains(normalized)
-                || resource.getLocation().toLowerCase().contains(normalized)
-                || resource.getType().name().toLowerCase().contains(normalized);
+        return contains(resource.getName(), normalized)
+                || contains(resource.getLocation(), normalized)
+                || contains(resource.getType() == null ? null : resource.getType().name(), normalized);
     }
 
     private boolean matchesLocation(CampusResource resource, String location) {
@@ -45,6 +52,10 @@ public class ResourceService {
             return true;
         }
 
-        return resource.getLocation().toLowerCase().contains(location.toLowerCase());
+        return contains(resource.getLocation(), location.toLowerCase());
+    }
+
+    private boolean contains(String value, String search) {
+        return value != null && value.toLowerCase().contains(search);
     }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React from "react";
 import "./App.css";
 import AuthPage from "./ui/AuthPage";
 import Dashboard from "./ui/Dashboard";
@@ -10,11 +10,12 @@ const routes = {
   studentDashboard: "/student/dashboard",
   technicianDashboard: "/technician/dashboard",
   adminDashboard: "/admin/dashboard",
+  adminCreateResource: "/admin/resources/create",
 };
 
 function App() {
   const [path, setPath] = usePath();
-  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
+  const [currentUser, setCurrentUser] = React.useState(() => getStoredUser());
 
   const navigate = (nextPath) => {
     window.history.pushState({}, "", nextPath);
@@ -44,7 +45,7 @@ function App() {
       );
     }
 
-    return <Dashboard onLogout={handleLogout} user={currentUser} />;
+    return <Dashboard onLogout={handleLogout} onNavigate={navigate} path={path} user={currentUser} />;
   }
 
   return (
@@ -57,9 +58,9 @@ function App() {
 }
 
 function usePath() {
-  const [path, setPath] = useState(normalizePath(window.location.pathname));
+  const [path, setPath] = React.useState(normalizePath(window.location.pathname));
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (window.location.pathname !== path) {
       window.history.replaceState({}, "", path);
     }
@@ -99,6 +100,7 @@ function isDashboardPath(path) {
     routes.studentDashboard,
     routes.technicianDashboard,
     routes.adminDashboard,
+    routes.adminCreateResource,
   ].includes(path);
 }
 

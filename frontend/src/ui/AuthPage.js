@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { login, registerStudent, registerTechnician } from "../api/authApi";
+import CampusHeader from "./CampusHeader";
 import Field from "./Field";
 
 const tabs = [
@@ -72,44 +73,34 @@ function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
   };
 
   return (
-    <main className="auth-shell min-h-screen px-5 py-8 text-campus-ink sm:px-8 lg:px-12">
-      <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="max-w-xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-campus-blue">
-            Smart Campus Operations Hub
+    <main className="auth-shell min-h-screen text-campus-ink">
+      <CampusHeader
+        active={activeTab === "login" ? "Home" : "Resources"}
+        onNavigate={(item) => {
+          if (item === "Get started") onNavigateTab("student");
+          if (item === "Sign in") onNavigateTab("login");
+        }}
+      />
+
+      <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.02fr_0.98fr] lg:px-12">
+        <div className="rounded-[2rem] bg-white p-6 shadow-panel sm:p-10">
+          <p className="text-sm font-black uppercase tracking-[0.32em] text-campus-blue">
+            Campus Hub
           </p>
-          <h1 className="text-4xl font-black leading-tight text-campus-ink sm:text-5xl">
-            Facility booking and incident workflows for one connected campus.
+          <h1 className="mt-5 text-4xl font-black text-campus-navy sm:text-5xl">
+            {title}
           </h1>
-          <p className="mt-5 text-lg leading-8 text-slate-700">
-            Start with role-based access for students, technicians, and admins before building the
-            facilities and maintenance modules.
+          <p className="mt-4 text-lg leading-8 text-slate-600">
+            Access your campus account and continue to your role-based workspace.
           </p>
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            {[
-              ["A", "Facilities catalogue"],
-              ["B", "Asset booking"],
-              ["C", "Maintenance tracking"],
-            ].map(([code, label]) => (
-              <div key={code} className="rounded-lg border border-white/80 bg-white/70 p-4 shadow-sm">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-campus-blue text-sm font-black text-white">
-                  {code}
-                </span>
-                <p className="mt-3 text-sm font-bold text-campus-navy">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="glass-panel rounded-lg p-5 shadow-panel sm:p-7">
-          <div className="mb-6 flex flex-wrap gap-2 rounded-lg bg-campus-cloud p-2">
+          <div className="mt-6 flex flex-wrap gap-2 rounded-2xl bg-[#eef6ff] p-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                className={`min-h-11 flex-1 rounded-md px-3 text-sm font-bold transition ${
+                className={`min-h-11 flex-1 rounded-xl px-3 text-sm font-bold transition ${
                   activeTab === tab.id
-                    ? "bg-campus-blue text-white shadow-sm"
+                    ? "bg-campus-navy text-white shadow-sm"
                     : "text-campus-navy hover:bg-white"
                 }`}
                 onClick={() => {
@@ -124,14 +115,7 @@ function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
             ))}
           </div>
 
-          <div className="mb-6">
-            <h2 className="text-2xl font-black text-campus-ink">{title}</h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Admin demo: admin@smartcampus.lk / Admin@123
-            </p>
-          </div>
-
-          <form className="grid gap-4" onSubmit={handleSubmit}>
+          <form className="mt-7 grid gap-5" onSubmit={handleSubmit}>
             {activeTab !== "login" && (
               <Field
                 label="Full name"
@@ -200,13 +184,48 @@ function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
             )}
 
             <button
-              className="primary-action mt-2 min-h-12 rounded-md px-5 text-base font-black text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-2 min-h-14 rounded-2xl bg-campus-navy px-5 text-base font-black text-white transition hover:bg-[#123f7a] disabled:cursor-not-allowed disabled:opacity-70"
               disabled={loading}
               type="submit"
             >
               {loading ? "Please wait..." : activeTab === "login" ? "Login" : "Create Account"}
             </button>
+
+            <div className="rounded-2xl border border-blue-100 bg-[#f8fbff] p-4 text-sm text-slate-600">
+              <span className="font-black text-campus-navy">Admin demo:</span>{" "}
+              admin@smartcampus.lk / Admin@123
+            </div>
           </form>
+        </div>
+
+        <div className="dark-hero rounded-[2rem] p-6 text-white shadow-panel sm:p-8">
+          <div className="rounded-[1.5rem] border border-white/10 bg-white/10 p-4">
+            <div className="flex aspect-[16/9] items-center justify-center rounded-[1.2rem] bg-gradient-to-br from-sky-200 via-blue-300 to-campus-blue text-center">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.3em] text-campus-navy">
+                  Campus Life
+                </p>
+                <p className="mt-2 text-3xl font-black text-white">Spaces that work</p>
+              </div>
+            </div>
+            <h2 className="mt-5 text-2xl font-black">University Campus Life</h2>
+            <p className="mt-2 max-w-lg text-sm leading-6 text-white/80">
+              Discover available rooms, equipment, capacity, and operational updates from one
+              smart campus workspace.
+            </p>
+          </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {[
+              ["Find the right place", "Search by location, room type, and capacity."],
+              ["Book with confidence", "Availability windows and status stay visible."],
+            ].map(([heading, copy]) => (
+              <div key={heading} className="rounded-2xl border border-white/10 bg-white/10 p-5">
+                <h3 className="text-xl font-black">{heading}</h3>
+                <p className="mt-3 text-sm leading-6 text-white/75">{copy}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>
