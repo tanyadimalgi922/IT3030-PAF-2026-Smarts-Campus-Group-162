@@ -191,7 +191,7 @@ function SlotCard({ onClick, selected, slot }) {
         selected
           ? "border-campus-blue shadow-[0_0_0_3px_rgba(37,99,235,0.12)]"
           : "border-slate-200 shadow-sm"
-      } ${interactive ? "hover:-translate-y-0.5 hover:border-campus-blue hover:shadow-md" : "opacity-90"}`}
+      } ${interactive ? "hover:-translate-y-0.5 hover:border-campus-blue hover:shadow-md" : "cursor-not-allowed opacity-75"}`}
       disabled={!interactive}
       onClick={onClick}
       type="button"
@@ -222,9 +222,11 @@ function SlotCard({ onClick, selected, slot }) {
         <Metric label="Booked" tone="booked" value={slot.bookedCount} />
       </div>
 
-      <p className={`mt-3 text-sm font-bold ${interactive ? "text-emerald-700" : "text-red-700"}`}>
-        {interactive ? "Available for request" : "Slot capacity full"}
-      </p>
+      {interactive && (
+        <p className="mt-3 text-sm font-bold text-emerald-700">
+          Available for request
+        </p>
+      )}
     </button>
   );
 }
