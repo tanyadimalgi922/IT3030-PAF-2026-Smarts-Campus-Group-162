@@ -14,7 +14,7 @@ const routes = {
 
 function App() {
   const [path, setPath] = usePath();
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
 
   const navigate = (nextPath) => {
     window.history.pushState({}, "", nextPath);
@@ -23,11 +23,13 @@ function App() {
 
   const handleAuthenticated = (user) => {
     setCurrentUser(user);
+    localStorage.setItem("smartCampusUser", JSON.stringify(user));
     navigate(getDashboardPath(user.role));
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
+    localStorage.removeItem("smartCampusUser");
     navigate(routes.login);
   };
 
@@ -98,6 +100,15 @@ function isDashboardPath(path) {
     routes.technicianDashboard,
     routes.adminDashboard,
   ].includes(path);
+}
+
+function getStoredUser() {
+  try {
+    const user = localStorage.getItem("smartCampusUser");
+    return user ? JSON.parse(user) : null;
+  } catch {
+    return null;
+  }
 }
 
 export default App;

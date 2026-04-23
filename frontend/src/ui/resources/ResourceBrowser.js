@@ -58,14 +58,14 @@ function ResourceBrowser({ refreshKey = 0 }) {
     <section className="mt-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-campus-blue">
+          <p className="text-sm font-bold uppercase tracking-[0.16em] text-campus-violet">
             Facilities & Assets Catalogue
           </p>
           <h2 className="mt-1 text-2xl font-black text-campus-ink">Bookable resources</h2>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 rounded-lg border border-blue-100 bg-campus-pale p-4 md:grid-cols-4">
+      <div className="glass-panel mt-4 grid gap-3 rounded-lg p-4 md:grid-cols-4">
         <input
           className="field-input"
           onChange={(event) => updateFilter("search", event.target.value)}

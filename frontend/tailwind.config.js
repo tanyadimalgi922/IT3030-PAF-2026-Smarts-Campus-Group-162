@@ -5,16 +5,19 @@ module.exports = {
     extend: {
       colors: {
         campus: {
-          ink: "#0F172A",
-          navy: "#0B2E59",
+          ink: "#07111F",
+          navy: "#0B1F44",
           blue: "#2563EB",
-          sky: "#E0F2FE",
+          cyan: "#06B6D4",
+          violet: "#7C3AED",
+          sky: "#E0F7FF",
           pale: "#F8FBFF",
-          cloud: "#EFF6FF",
+          cloud: "#EEF6FF",
         },
       },
       boxShadow: {
-        panel: "0 24px 80px rgba(37, 99, 235, 0.14)",
+        panel: "0 28px 90px rgba(37, 99, 235, 0.18)",
+        glow: "0 18px 50px rgba(6, 182, 212, 0.22)",
       },
     },
   },

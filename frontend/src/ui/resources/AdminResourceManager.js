@@ -10,11 +10,12 @@ const initialForm = {
   location: "",
   status: "ACTIVE",
   imageDataUrl: "",
-  availabilityWindows: [{ date: "", startTime: "", endTime: "" }],
+  availabilityWindows: [{ startDate: "", endDate: "", startTime: "", endTime: "" }],
 };
 
 function AdminResourceManager() {
   const [form, setForm] = useState(initialForm);
+  const [showForm, setShowForm] = useState(false);
   const [status, setStatus] = useState({ tone: "idle", message: "" });
   const [saving, setSaving] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -35,7 +36,10 @@ function AdminResourceManager() {
   const addWindow = () => {
     setForm((current) => ({
       ...current,
-      availabilityWindows: [...current.availabilityWindows, { date: "", startTime: "", endTime: "" }],
+      availabilityWindows: [
+        ...current.availabilityWindows,
+        { startDate: "", endDate: "", startTime: "", endTime: "" },
+      ],
     }));
   };
 
@@ -67,10 +71,11 @@ function AdminResourceManager() {
         ...form,
         capacity: Number(form.capacity),
         availabilityWindows: form.availabilityWindows.filter(
-          (window) => window.date && window.startTime && window.endTime
+          (window) => window.startDate && window.endDate && window.startTime && window.endTime
         ),
       });
       setForm(initialForm);
+      setShowForm(false);
       setRefreshKey((current) => current + 1);
       setStatus({ tone: "success", message: "Resource created successfully." });
     } catch (error) {
@@ -82,12 +87,26 @@ function AdminResourceManager() {
 
   return (
     <section className="mt-8">
-      <div className="rounded-lg border border-blue-100 bg-campus-pale p-5">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-campus-blue">
-          Admin Resource Setup
-        </p>
-        <h2 className="mt-1 text-2xl font-black text-campus-ink">Create bookable resource</h2>
+      <div className="glass-panel rounded-lg p-5 shadow-glow">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.16em] text-campus-violet">
+              Admin Resource Studio
+            </p>
+            <h2 className="mt-1 text-2xl font-black text-campus-ink">
+              Facilities & assets control
+            </h2>
+          </div>
+          <button
+            className="primary-action min-h-12 rounded-md px-5 text-sm font-black text-white transition hover:scale-[1.01]"
+            onClick={() => setShowForm((current) => !current)}
+            type="button"
+          >
+            {showForm ? "Close Form" : "Create Resource"}
+          </button>
+        </div>
 
+        {showForm && (
         <form className="mt-5 grid gap-4" onSubmit={handleSubmit}>
           <div className="grid gap-4 md:grid-cols-2">
             <Field
@@ -166,13 +185,20 @@ function AdminResourceManager() {
 
             <div className="mt-4 grid gap-3">
               {form.availabilityWindows.map((window, index) => (
-                <div key={index} className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+                <div key={index} className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
                   <input
                     className="field-input"
-                    onChange={(event) => updateWindow(index, "date", event.target.value)}
+                    onChange={(event) => updateWindow(index, "startDate", event.target.value)}
                     required
                     type="date"
-                    value={window.date}
+                    value={window.startDate}
+                  />
+                  <input
+                    className="field-input"
+                    onChange={(event) => updateWindow(index, "endDate", event.target.value)}
+                    required
+                    type="date"
+                    value={window.endDate}
                   />
                   <input
                     className="field-input"
@@ -214,13 +240,14 @@ function AdminResourceManager() {
           )}
 
           <button
-            className="min-h-12 rounded-md bg-campus-blue px-5 text-base font-black text-white transition hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:opacity-70"
+            className="primary-action min-h-12 rounded-md px-5 text-base font-black text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
             disabled={saving}
             type="submit"
           >
             {saving ? "Saving..." : "Create Resource"}
           </button>
         </form>
+        )}
       </div>
 
       <ResourceBrowser refreshKey={refreshKey} />

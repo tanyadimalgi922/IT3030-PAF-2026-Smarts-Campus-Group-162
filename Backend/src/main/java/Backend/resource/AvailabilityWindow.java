@@ -5,7 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 public class AvailabilityWindow {
 
     @NotBlank
-    private String date;
+    private String startDate;
+
+    @NotBlank
+    private String endDate;
 
     @NotBlank
     private String startTime;
@@ -13,12 +16,20 @@ public class AvailabilityWindow {
     @NotBlank
     private String endTime;
 
-    public String getDate() {
-        return date;
+    public String getStartDate() {
+        return startDate;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 
     public String getStartTime() {

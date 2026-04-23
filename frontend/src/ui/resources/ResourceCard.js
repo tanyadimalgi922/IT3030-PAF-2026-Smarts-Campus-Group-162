@@ -1,6 +1,6 @@
 function ResourceCard({ resource }) {
   return (
-    <article className="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm">
+    <article className="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow">
       <div className="aspect-[16/9] bg-campus-cloud">
         {resource.imageDataUrl ? (
           <img
@@ -49,7 +49,7 @@ function ResourceCard({ resource }) {
             {(resource.availabilityWindows || []).length > 0 ? (
               resource.availabilityWindows.map((window, index) => (
                 <p key={`${window.date}-${window.startTime}-${index}`}>
-                  {window.date} / {window.startTime} - {window.endTime}
+                  {formatWindow(window)}
                 </p>
               ))
             ) : (
@@ -68,6 +68,12 @@ function formatType(type) {
 
 function formatStatus(status) {
   return (status || "").replaceAll("_", " ");
+}
+
+function formatWindow(window) {
+  const startDate = window.startDate || window.date || "Start date";
+  const endDate = window.endDate || window.date || "End date";
+  return `${startDate} to ${endDate} / ${window.startTime} - ${window.endTime}`;
 }
 
 export default ResourceCard;

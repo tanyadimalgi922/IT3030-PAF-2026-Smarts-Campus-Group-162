@@ -102,7 +102,7 @@ function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
           </div>
         </div>
 
-        <div className="rounded-lg bg-white p-5 shadow-panel sm:p-7">
+        <div className="glass-panel rounded-lg p-5 shadow-panel sm:p-7">
           <div className="mb-6 flex flex-wrap gap-2 rounded-lg bg-campus-cloud p-2">
             {tabs.map((tab) => (
               <button
@@ -200,7 +200,7 @@ function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
             )}
 
             <button
-              className="mt-2 min-h-12 rounded-md bg-campus-blue px-5 text-base font-black text-white transition hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:opacity-70"
+              className="primary-action mt-2 min-h-12 rounded-md px-5 text-base font-black text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
               disabled={loading}
               type="submit"
             >
