@@ -22,6 +22,14 @@
   box-shadow: 0 14px 30px rgba(31, 130, 255, 0.28);
 }
 
+.campus-footer {
+  background:
+    radial-gradient(circle at 88% 18%, rgba(110, 210, 255, 0.2), transparent 24%),
+    radial-gradient(circle at 14% 82%, rgba(255, 203, 88, 0.14), transparent 22%),
+    linear-gradient(135deg, #08101f 0%, #122344 46%, #163d7d 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .field-label {
   color: #12345c;
   display: block;

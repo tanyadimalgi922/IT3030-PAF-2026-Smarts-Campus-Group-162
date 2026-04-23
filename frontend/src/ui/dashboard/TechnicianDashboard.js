@@ -1,4 +1,5 @@
 import InfoCard from "./InfoCard";
+import CampusFooter from "../CampusFooter";
 import CampusHeader from "../CampusHeader";
 import TechnicianIncidentOverview from "../incidents/TechnicianIncidentOverview";
 import TechnicianIncidentWorkspacePage from "../incidents/TechnicianIncidentWorkspacePage";
@@ -33,9 +34,9 @@ function TechnicianDashboard({ user, onLogout, onNavigate, path }) {
   }
 
   return (
-    <main className="auth-shell min-h-screen text-campus-ink">
+    <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
       <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
-      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
         <TechnicianIncidentOverview onNavigate={onNavigate} user={user} />
 
         <div className="mt-6 rounded-[2rem] bg-white p-7 shadow-panel sm:p-8">
@@ -50,6 +51,7 @@ function TechnicianDashboard({ user, onLogout, onNavigate, path }) {
           </div>
         </div>
       </section>
+      <CampusFooter onNavigate={onNavigate} user={user} />
     </main>
   );
 }

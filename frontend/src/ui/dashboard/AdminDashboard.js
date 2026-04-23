@@ -1,4 +1,5 @@
 import CampusHeader from "../CampusHeader";
+import CampusFooter from "../CampusFooter";
 import InfoCard from "./InfoCard";
 import ResourceTypeChart from "./ResourceTypeChart";
 import AdminResourceManager from "../resources/AdminResourceManager";
@@ -46,9 +47,9 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
 
   if (path === "/admin/bookings") {
     return (
-      <main className="auth-shell min-h-screen text-campus-ink">
+      <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
         <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
-        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+        <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
           <div className="dark-hero rounded-[2rem] p-6 text-white shadow-panel sm:p-9">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -74,25 +75,27 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
 
           <AdminBookingManager user={user} />
         </section>
+        <CampusFooter onNavigate={onNavigate} user={user} />
       </main>
     );
   }
 
   if (path === "/admin/incidents") {
     return (
-      <main className="auth-shell min-h-screen text-campus-ink">
+      <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
         <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
-        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+        <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
           <IncidentTicketsPage mode="admin" onBack={() => onNavigate("/admin/dashboard")} user={user} />
         </section>
+        <CampusFooter onNavigate={onNavigate} user={user} />
       </main>
     );
   }
 
   return (
-    <main className="auth-shell min-h-screen text-campus-ink">
+    <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
       <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
-      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
         <div className="dark-hero rounded-[2rem] p-6 text-white shadow-panel sm:p-9">
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-start">
             <div>
@@ -177,6 +180,7 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
           onEdit={(resourceId) => onNavigate(`/admin/resources/edit/${resourceId}`)}
         />
       </section>
+      <CampusFooter onNavigate={onNavigate} user={user} />
     </main>
   );
 }

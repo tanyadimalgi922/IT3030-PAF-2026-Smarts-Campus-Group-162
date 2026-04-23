@@ -1,4 +1,5 @@
 import CampusHeader from "../CampusHeader";
+import CampusFooter from "../CampusFooter";
 import InfoCard from "./InfoCard";
 import StudentBookingList from "../bookings/StudentBookingList";
 import StudentResourcesPage from "./StudentResourcesPage";
@@ -42,9 +43,9 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
 
   if (path === "/student/bookings") {
     return (
-      <main className="auth-shell min-h-screen text-campus-ink">
+      <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
         <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
-        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+        <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
           <div className="dark-hero rounded-[2rem] p-7 text-white shadow-panel sm:p-10">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -70,6 +71,7 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
 
           <StudentBookingList onNavigate={onNavigate} user={user} />
         </section>
+        <CampusFooter onNavigate={onNavigate} user={user} />
       </main>
     );
   }
@@ -80,9 +82,9 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
       : "";
 
     return (
-      <main className="auth-shell min-h-screen text-campus-ink">
+      <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
         <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
-        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+        <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
           <IncidentTicketsPage
             mode="student"
             onBack={() => onNavigate("/student/dashboard")}
@@ -90,14 +92,15 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
             user={user}
           />
         </section>
+        <CampusFooter onNavigate={onNavigate} user={user} />
       </main>
     );
   }
 
   return (
-    <main className="auth-shell min-h-screen text-campus-ink">
+    <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
       <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
-      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div className="rounded-[2rem] bg-white p-7 shadow-panel sm:p-10">
             <p className="text-sm font-black uppercase tracking-[0.32em] text-campus-blue">
@@ -164,6 +167,7 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
           <InfoCard label="Access" value="Facilities, bookings, and incident reporting" />
         </div>
       </section>
+      <CampusFooter onNavigate={onNavigate} user={user} />
     </main>
   );
 }

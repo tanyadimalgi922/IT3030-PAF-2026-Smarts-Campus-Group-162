@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createResource, getResource, updateResource } from "../../api/resourceApi";
+import CampusFooter from "../CampusFooter";
 import CampusHeader from "../CampusHeader";
 import Field from "../Field";
 
@@ -193,9 +194,9 @@ function ResourceCreatePage({ onBack, onLogout, onNavigate, resourceId, user }) 
   };
 
   return (
-    <main className="auth-shell min-h-screen text-campus-ink">
+    <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
       <CampusHeader active="Resources" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
-      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
         <div className="dark-hero rounded-[2rem] p-7 text-white shadow-panel sm:p-10">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -467,6 +468,7 @@ function ResourceCreatePage({ onBack, onLogout, onNavigate, resourceId, user }) 
       </form>
       )}
       </section>
+      <CampusFooter onNavigate={onNavigate} user={user} />
     </main>
   );
 }

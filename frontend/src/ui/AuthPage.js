@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { login, registerStudent, registerTechnician } from "../api/authApi";
+import CampusFooter from "./CampusFooter";
 import CampusHeader from "./CampusHeader";
 import Field from "./Field";
 
@@ -73,7 +74,7 @@ function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
   };
 
   return (
-    <main className="auth-shell min-h-screen text-campus-ink">
+    <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
       <CampusHeader
         active={activeTab === "login" ? "Home" : "Resources"}
         onNavigate={(item) => {
@@ -85,7 +86,7 @@ function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
         }}
       />
 
-      <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.02fr_0.98fr] lg:px-12">
+      <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl flex-1 items-center gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.02fr_0.98fr] lg:px-12">
         <div className="rounded-[2rem] bg-white p-6 shadow-panel sm:p-10">
           <p className="text-sm font-black uppercase tracking-[0.32em] text-campus-blue">
             Campus Hub
@@ -231,6 +232,7 @@ function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
           </div>
         </div>
       </section>
+      <CampusFooter onNavigate={(path) => onNavigateTab(getFooterTab(path))} />
     </main>
   );
 }
@@ -245,6 +247,14 @@ function submitActiveForm(activeTab, payload) {
   }
 
   return login(payload);
+}
+
+function getFooterTab(path) {
+  if (path === "/") return "home";
+  if (path === "/about") return "about";
+  if (path === "/register/student") return "student";
+  if (path === "/register/technician") return "technician";
+  return "login";
 }
 
 export default AuthPage;

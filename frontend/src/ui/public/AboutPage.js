@@ -1,8 +1,9 @@
 import CampusHeader from "../CampusHeader";
+import CampusFooter from "../CampusFooter";
 
 function AboutPage({ onLogout, onNavigate, user }) {
   return (
-    <main className="public-shell min-h-screen text-campus-ink">
+    <main className="public-shell flex min-h-screen flex-col text-campus-ink">
       <CampusHeader
         active="About Us"
         onLogout={onLogout}
@@ -10,7 +11,7 @@ function AboutPage({ onLogout, onNavigate, user }) {
         user={user}
       />
 
-      <section className="mx-auto max-w-7xl px-5 pb-12 pt-8 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-7xl flex-1 px-5 pb-12 pt-8 sm:px-8 lg:px-12">
         <div className="about-hero rounded-[2rem] p-7 text-white shadow-panel sm:p-10">
           <p className="text-sm font-black uppercase tracking-[0.32em] text-amber-200">About Us</p>
           <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_0.85fr] lg:items-end">
@@ -129,6 +130,7 @@ function AboutPage({ onLogout, onNavigate, user }) {
           </section>
         </div>
       </section>
+      <CampusFooter onNavigate={onNavigate} user={user} />
     </main>
   );
 }

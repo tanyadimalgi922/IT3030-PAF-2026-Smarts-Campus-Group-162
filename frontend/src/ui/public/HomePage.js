@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import CampusFooter from "../CampusFooter";
 import CampusHeader from "../CampusHeader";
 
 const slides = [
@@ -34,7 +35,7 @@ function HomePage({ onLogout, onNavigate, user }) {
   }, []);
 
   return (
-    <main className="public-shell min-h-screen text-campus-ink">
+    <main className="public-shell flex min-h-screen flex-col text-campus-ink">
       <CampusHeader
         active="Home"
         onLogout={onLogout}
@@ -42,7 +43,7 @@ function HomePage({ onLogout, onNavigate, user }) {
         user={user}
       />
 
-      <section className="mx-auto max-w-7xl px-5 pb-12 pt-8 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-7xl flex-1 px-5 pb-12 pt-8 sm:px-8 lg:px-12">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="public-hero-card rounded-[2rem] p-7 text-white shadow-panel sm:p-10">
             <p className="text-sm font-black uppercase tracking-[0.32em] text-amber-200">
@@ -197,6 +198,7 @@ function HomePage({ onLogout, onNavigate, user }) {
           </section>
         </div>
       </section>
+      <CampusFooter onNavigate={onNavigate} user={user} />
     </main>
   );
 }

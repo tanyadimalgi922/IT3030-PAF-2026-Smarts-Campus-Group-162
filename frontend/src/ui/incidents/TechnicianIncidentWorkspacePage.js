@@ -1,4 +1,5 @@
 import CampusHeader from "../CampusHeader";
+import CampusFooter from "../CampusFooter";
 import IncidentTicketsPage from "./IncidentTicketsPage";
 
 function TechnicianIncidentWorkspacePage({ onLogout, onNavigate, user }) {
@@ -27,11 +28,12 @@ function TechnicianIncidentWorkspacePage({ onLogout, onNavigate, user }) {
   };
 
   return (
-    <main className="auth-shell min-h-screen text-campus-ink">
+    <main className="auth-shell flex min-h-screen flex-col text-campus-ink">
       <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
-      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+      <section className="mx-auto max-w-7xl flex-1 px-5 py-8 sm:px-8 lg:px-12">
         <IncidentTicketsPage mode="technician" onBack={() => onNavigate("/technician/dashboard")} user={user} />
       </section>
+      <CampusFooter onNavigate={onNavigate} user={user} />
     </main>
   );
 }
