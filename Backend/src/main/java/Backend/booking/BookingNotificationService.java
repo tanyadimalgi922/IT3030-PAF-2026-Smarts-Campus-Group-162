@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 @Service
@@ -130,9 +131,7 @@ public class BookingNotificationService {
             helper.setSubject(subject);
             helper.setText(html, true);
 
-            if (StringUtils.hasText(mailFrom)) {
-                helper.setFrom(new InternetAddress(mailFrom, mailFromName).toString());
-            }
+            applyFrom(helper);
 
             if (qrImage != null) {
                 helper.addInline("bookingQrCode", new ByteArrayResource(qrImage), "image/png");
@@ -182,5 +181,17 @@ public class BookingNotificationService {
 
     private String safe(String value) {
         return StringUtils.hasText(value) ? value : "-";
+    }
+
+    private void applyFrom(MimeMessageHelper helper) throws MessagingException {
+        if (!StringUtils.hasText(mailFrom)) {
+            return;
+        }
+
+        try {
+            helper.setFrom(new InternetAddress(mailFrom, mailFromName).toString());
+        } catch (UnsupportedEncodingException exception) {
+            helper.setFrom(mailFrom);
+        }
     }
 }
