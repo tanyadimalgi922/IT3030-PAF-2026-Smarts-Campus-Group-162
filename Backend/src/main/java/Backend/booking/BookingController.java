@@ -53,6 +53,11 @@ public class BookingController {
         return bookingService.getSlots(resourceId, date);
     }
 
+    @GetMapping("/{id}/verification")
+    public BookingVerificationResponse getBookingVerification(@PathVariable String id) {
+        return bookingService.getVerification(id);
+    }
+
     @PatchMapping("/{id}/approve")
     public ResourceBooking approveBooking(
             @PathVariable String id,

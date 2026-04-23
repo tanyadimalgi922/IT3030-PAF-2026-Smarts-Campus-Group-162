@@ -11,6 +11,7 @@ const routes = {
   studentResources: "/student/resources",
   technicianDashboard: "/technician/dashboard",
   adminDashboard: "/admin/dashboard",
+  adminBookings: "/admin/bookings",
   adminCreateResource: "/admin/resources/create",
   adminEditResource: "/admin/resources/edit",
 };
@@ -103,6 +104,7 @@ function isDashboardPath(path) {
     routes.studentResources,
     routes.technicianDashboard,
     routes.adminDashboard,
+    routes.adminBookings,
     routes.adminCreateResource,
   ].includes(path) || path.startsWith(`${routes.adminEditResource}/`);
 }

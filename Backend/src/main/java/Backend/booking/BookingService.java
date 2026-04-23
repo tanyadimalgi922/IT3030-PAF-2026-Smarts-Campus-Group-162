@@ -25,10 +25,16 @@ public class BookingService {
 
     private final ResourceBookingRepository bookingRepository;
     private final CampusResourceRepository resourceRepository;
+    private final BookingNotificationService notificationService;
 
-    public BookingService(ResourceBookingRepository bookingRepository, CampusResourceRepository resourceRepository) {
+    public BookingService(
+            ResourceBookingRepository bookingRepository,
+            CampusResourceRepository resourceRepository,
+            BookingNotificationService notificationService
+    ) {
         this.bookingRepository = bookingRepository;
         this.resourceRepository = resourceRepository;
+        this.notificationService = notificationService;
     }
 
     public ResourceBooking create(BookingRequest request) {
@@ -104,7 +110,9 @@ public class BookingService {
         booking.setReviewReason(request.reason());
         booking.setReviewedBy(adminName);
         booking.setUpdatedAt(Instant.now());
-        return bookingRepository.save(booking);
+        ResourceBooking savedBooking = bookingRepository.save(booking);
+        notificationService.sendApprovalEmail(savedBooking);
+        return savedBooking;
     }
 
     public ResourceBooking reject(String bookingId, BookingReviewRequest request, String adminName) {
@@ -117,7 +125,9 @@ public class BookingService {
         booking.setReviewReason(request.reason());
         booking.setReviewedBy(adminName);
         booking.setUpdatedAt(Instant.now());
-        return bookingRepository.save(booking);
+        ResourceBooking savedBooking = bookingRepository.save(booking);
+        notificationService.sendRejectionEmail(savedBooking);
+        return savedBooking;
     }
 
     public ResourceBooking cancel(String bookingId, BookingReviewRequest request, String userName) {
@@ -131,6 +141,25 @@ public class BookingService {
         booking.setReviewedBy(userName);
         booking.setUpdatedAt(Instant.now());
         return bookingRepository.save(booking);
+    }
+
+    public BookingVerificationResponse getVerification(String bookingId) {
+        ResourceBooking booking = getBooking(bookingId);
+        return new BookingVerificationResponse(
+                booking.getId(),
+                booking.getResourceName(),
+                booking.getUserName(),
+                booking.getUserEmail(),
+                booking.getDate(),
+                booking.getStartTime(),
+                booking.getEndTime(),
+                booking.getExpectedAttendees(),
+                booking.getPurpose(),
+                booking.getStatus().name(),
+                booking.getReviewedBy(),
+                booking.getReviewReason(),
+                booking.getStatus() == BookingStatus.APPROVED
+        );
     }
 
     private ResourceBooking getBooking(String id) {
