@@ -6,6 +6,7 @@ import Field from "../Field";
 const amenities = ["Wi-Fi", "Air conditioning", "Smart board", "Whiteboard", "Sound system"];
 const buildings = ["Main Academic Block", "Science Complex", "Engineering Block", "Library Building", "Sports Center"];
 const floors = ["Ground Floor", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"];
+const halfHourPattern = /^([01]\d|2[0-3]):(00|30)$/;
 
 const initialForm = {
   name: "",
@@ -27,6 +28,8 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(Boolean(resourceId));
   const isEditMode = Boolean(resourceId);
+  const today = getTodayDate();
+  const isEquipment = form.type === "EQUIPMENT";
 
   useEffect(() => {
     let active = true;
@@ -47,7 +50,7 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
           setForm({
             ...initialForm,
             ...resource,
-            capacity: resource.capacity ? String(resource.capacity) : "",
+            capacity: resource.type === "EQUIPMENT" ? "1" : resource.capacity ? String(resource.capacity) : "",
             amenities: resource.amenities || [],
             availabilityWindows:
               (resource.availabilityWindows || []).length > 0
@@ -75,6 +78,14 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const updateType = (value) => {
+    setForm((current) => ({
+      ...current,
+      type: value,
+      capacity: value === "EQUIPMENT" ? "1" : current.capacity === "1" ? "" : current.capacity,
+    }));
   };
 
   const updateWindow = (index, field, value) => {
@@ -125,13 +136,19 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setSaving(true);
     setStatus({ tone: "idle", message: "" });
 
     try {
+      const validationMessage = validateForm(form, today);
+      if (validationMessage) {
+        setStatus({ tone: "error", message: validationMessage });
+        return;
+      }
+
+      setSaving(true);
       const payload = {
         ...form,
-        capacity: Number(form.capacity),
+        capacity: form.type === "EQUIPMENT" ? 1 : Number(form.capacity),
         availabilityWindows: form.availabilityWindows.filter(
           (window) => window.startDate && window.endDate && window.startTime && window.endTime
         ),
@@ -201,7 +218,7 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
               <span className="field-label">Resource type</span>
               <select
                 className="field-input"
-                onChange={(event) => updateField("type", event.target.value)}
+                onChange={(event) => updateType(event.target.value)}
                 value={form.type}
               >
                 <option value="LECTURE_HALL">Lecture hall</option>
@@ -210,13 +227,26 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
                 <option value="EQUIPMENT">Equipment</option>
               </select>
             </label>
-            <Field
-              label="Capacity"
-              onChange={(value) => updateField("capacity", value)}
-              placeholder="120"
-              type="number"
-              value={form.capacity}
-            />
+            <label>
+              <span className="field-label">
+                {isEquipment ? "Borrow quantity" : "Capacity"}
+              </span>
+              <input
+                className="field-input disabled:bg-slate-100 disabled:text-slate-500"
+                disabled={isEquipment}
+                min="1"
+                onChange={(event) => updateField("capacity", event.target.value)}
+                placeholder={isEquipment ? "1 person can borrow" : "120"}
+                required
+                type="number"
+                value={isEquipment ? "1" : form.capacity}
+              />
+              {isEquipment && (
+                <span className="mt-2 block text-xs font-bold text-campus-blue">
+                  Equipment is issued to one person at a time.
+                </span>
+              )}
+            </label>
             <Field
               label="Location"
               onChange={(value) => updateField("location", value)}
@@ -340,6 +370,7 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
               <div key={index} className="grid gap-3 rounded-lg border border-blue-100 bg-white/80 p-3 md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
                 <input
                   className="field-input"
+                  min={today}
                   onChange={(event) => updateWindow(index, "startDate", event.target.value)}
                   required
                   type="date"
@@ -347,6 +378,7 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
                 />
                 <input
                   className="field-input"
+                  min={window.startDate || today}
                   onChange={(event) => updateWindow(index, "endDate", event.target.value)}
                   required
                   type="date"
@@ -356,6 +388,7 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
                   className="field-input"
                   onChange={(event) => updateWindow(index, "startTime", event.target.value)}
                   required
+                  step="1800"
                   type="time"
                   value={window.startTime}
                 />
@@ -363,6 +396,7 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
                   className="field-input"
                   onChange={(event) => updateWindow(index, "endTime", event.target.value)}
                   required
+                  step="1800"
                   type="time"
                   value={window.endTime}
                 />
@@ -412,6 +446,44 @@ function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
       </section>
     </main>
   );
+}
+
+function getTodayDate() {
+  return new Date().toLocaleDateString("en-CA");
+}
+
+function validateForm(form, today) {
+  const windows = form.availabilityWindows.filter(
+    (window) => window.startDate && window.endDate && window.startTime && window.endTime
+  );
+
+  if (windows.length === 0) {
+    return "Add at least one complete availability window.";
+  }
+
+  if (form.type === "EQUIPMENT" && Number(form.capacity || 1) !== 1) {
+    return "Equipment capacity must be 1 because only one person can borrow it at a time.";
+  }
+
+  for (const window of windows) {
+    if (window.startDate < today) {
+      return "Start date must be today or after today.";
+    }
+
+    if (window.endDate < window.startDate) {
+      return "End date must be on or after the start date.";
+    }
+
+    if (!halfHourPattern.test(window.startTime) || !halfHourPattern.test(window.endTime)) {
+      return "Time must use only :00 or :30 minutes, like 08:00 or 08:30.";
+    }
+
+    if (window.startDate === window.endDate && window.endTime <= window.startTime) {
+      return "End time must be after start time for the same date.";
+    }
+  }
+
+  return "";
 }
 
 export default ResourceCreatePage;
