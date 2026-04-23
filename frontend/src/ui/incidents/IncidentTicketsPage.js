@@ -338,7 +338,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
   };
 
   const filteredResources = resources.filter((resource) => resource.status === "ACTIVE");
-  const selectedTicket = mode === "technician"
+  const selectedTicket = (mode === "technician" || mode === "admin")
     ? tickets.find((ticket) => ticket.id === selectedTicketId) || null
     : null;
   const pageTitle = mode === "student"
@@ -485,7 +485,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
             {mode === "student" ? "My incidents" : mode === "admin" ? "All incident tickets" : "Assigned incidents"}
           </h2>
         </div>
-        {mode === "technician" ? (
+        {mode === "technician" || mode === "admin" ? (
           <div className="flex flex-wrap gap-2">
             {[
               { value: "", label: "All" },
@@ -493,6 +493,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
               { value: "IN_PROGRESS", label: "In Progress" },
               { value: "RESOLVED", label: "Resolved" },
               { value: "CLOSED", label: "Closed" },
+              ...(mode === "admin" ? [{ value: "REJECTED", label: "Rejected" }] : []),
             ].map((tab) => (
               <button
                 key={tab.value || "all"}
@@ -536,7 +537,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
         </div>
       )}
 
-      {mode === "technician" ? (
+      {mode === "technician" || mode === "admin" ? (
         <div className="mt-5">
           {loading ? (
             <div className="rounded-[2rem] border border-blue-100 bg-white p-6 text-sm font-bold text-campus-blue shadow-sm">
@@ -545,9 +546,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
           ) : tickets.length > 0 ? (
             <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
               <section className="rounded-[2rem] border border-blue-100 bg-white p-4 shadow-sm sm:p-5">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-campus-blue">
-                  Basic Details
-                </p>
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-campus-blue">Basic Details</p>
                 <div className="mt-4 grid gap-3">
                   {tickets.map((ticket) => (
                     <button
@@ -573,6 +572,9 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
                       <div className="mt-3 grid gap-1 text-xs font-semibold text-slate-600">
                         <p>Reported by: {ticket.createdByUserName}</p>
                         <p>Location: {ticket.resourceLocation}</p>
+                        {mode === "admin" && (
+                          <p>Assigned: {ticket.assignedTechnicianName || "Not assigned"}</p>
+                        )}
                         <p>Created: {formatDateTime(ticket.createdAt)}</p>
                       </div>
                     </button>
@@ -645,21 +647,64 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
                       </div>
                     )}
 
-                    <div className="mt-5">
-                      <StatusEditor
-                        disabled={ticketActionId === selectedTicket.id}
-                        form={statusForms[selectedTicket.id] || { status: "", resolutionNotes: "", rejectionReason: "" }}
-                        mode="technician"
-                        onChange={(field, value) =>
-                          setStatusForms((current) => ({
-                            ...current,
-                            [selectedTicket.id]: { ...current[selectedTicket.id], [field]: value },
-                          }))
-                        }
-                        onSubmit={() => handleStatusUpdate(selectedTicket.id)}
-                        ticket={selectedTicket}
-                      />
-                    </div>
+                    {mode === "admin" ? (
+                      <div className="mt-5 grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+                        <section className="rounded-2xl border border-blue-100 bg-[#f8fbff] p-4">
+                          <p className="text-xs font-black uppercase tracking-[0.16em] text-campus-blue">Assign technician</p>
+                          <div className="mt-3 flex flex-col gap-3">
+                            <select
+                              className="field-input"
+                              onChange={(event) => setAssignments((current) => ({ ...current, [selectedTicket.id]: event.target.value }))}
+                              value={assignments[selectedTicket.id] || ""}
+                            >
+                              <option value="">Select technician</option>
+                              {technicians.map((technician) => (
+                                <option key={technician.id} value={technician.id}>
+                                  {technician.fullName} - {technician.specialization || "General"}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              className="primary-action min-h-12 rounded-2xl px-5 text-sm font-black text-white disabled:opacity-60"
+                              disabled={!assignments[selectedTicket.id] || ticketActionId === selectedTicket.id}
+                              onClick={() => handleAssign(selectedTicket.id)}
+                              type="button"
+                            >
+                              Assign Technician
+                            </button>
+                          </div>
+                        </section>
+
+                        <StatusEditor
+                          disabled={ticketActionId === selectedTicket.id}
+                          form={statusForms[selectedTicket.id] || { status: "", resolutionNotes: "", rejectionReason: "" }}
+                          onChange={(field, value) =>
+                            setStatusForms((current) => ({
+                              ...current,
+                              [selectedTicket.id]: { ...current[selectedTicket.id], [field]: value },
+                            }))
+                          }
+                          onSubmit={() => handleStatusUpdate(selectedTicket.id)}
+                          ticket={selectedTicket}
+                        />
+                      </div>
+                    ) : (
+                      <div className="mt-5">
+                        <StatusEditor
+                          disabled={ticketActionId === selectedTicket.id}
+                          form={statusForms[selectedTicket.id] || { status: "", resolutionNotes: "", rejectionReason: "" }}
+                          mode="technician"
+                          onChange={(field, value) =>
+                            setStatusForms((current) => ({
+                              ...current,
+                              [selectedTicket.id]: { ...current[selectedTicket.id], [field]: value },
+                            }))
+                          }
+                          onSubmit={() => handleStatusUpdate(selectedTicket.id)}
+                          ticket={selectedTicket}
+                        />
+                      </div>
+                    )}
 
                     <TicketCommentsSection
                       commentEditMap={commentEditMap}
@@ -682,7 +727,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
             </div>
           ) : (
             <div className="rounded-[2rem] border border-blue-100 bg-white p-6 text-sm font-bold text-slate-600 shadow-sm">
-              No tickets are currently assigned to you.
+              {mode === "admin" ? "No incident tickets found." : "No tickets are currently assigned to you."}
             </div>
           )}
         </div>
