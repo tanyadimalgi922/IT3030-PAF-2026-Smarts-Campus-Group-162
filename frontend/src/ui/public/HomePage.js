@@ -22,7 +22,7 @@ const slides = [
   },
 ];
 
-function HomePage({ onNavigate }) {
+function HomePage({ onLogout, onNavigate, user }) {
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
@@ -35,7 +35,12 @@ function HomePage({ onNavigate }) {
 
   return (
     <main className="public-shell min-h-screen text-campus-ink">
-      <CampusHeader active="Home" onNavigate={(item) => handlePublicNavigate(item, onNavigate)} />
+      <CampusHeader
+        active="Home"
+        onLogout={onLogout}
+        onNavigate={(item) => handlePublicNavigate(item, onNavigate, user)}
+        user={user}
+      />
 
       <section className="mx-auto max-w-7xl px-5 pb-12 pt-8 sm:px-8 lg:px-12">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -196,12 +201,19 @@ function HomePage({ onNavigate }) {
   );
 }
 
-function handlePublicNavigate(item, onNavigate) {
+function handlePublicNavigate(item, onNavigate, user) {
   if (item === "Home") onNavigate("/");
+  if (item === "Dashboard") onNavigate(getDashboardPath(user?.role));
   if (item === "About Us") onNavigate("/about");
-  if (item === "Resources") onNavigate("/login");
+  if (item === "Resources") onNavigate(user ? getDashboardPath(user.role) : "/login");
   if (item === "Sign in") onNavigate("/login");
-  if (item === "Get started") onNavigate("/register/student");
+  if (item === "Get started") onNavigate(user ? getDashboardPath(user.role) : "/register/student");
+}
+
+function getDashboardPath(role) {
+  if (role === "STUDENT") return "/student/dashboard";
+  if (role === "TECHNICIAN") return "/technician/dashboard";
+  return "/admin/dashboard";
 }
 
 function HeroMetric({ label, value }) {

@@ -1,5 +1,5 @@
 function CampusHeader({ active = "Home", onLogout, onNavigate, user }) {
-  const navItems = user ? ["Dashboard", "About Us", "Resources"] : ["Home", "About Us", "Resources"];
+  const navItems = user ? ["Home", "Dashboard", "About Us", "Resources"] : ["Home", "About Us", "Resources"];
 
   return (
     <header className="campus-header sticky top-0 z-20 px-5 py-4 text-white sm:px-8 lg:px-12">

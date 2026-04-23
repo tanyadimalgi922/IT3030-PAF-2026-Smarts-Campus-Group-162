@@ -4,7 +4,12 @@ import ResourceBrowser from "../resources/ResourceBrowser";
 
 function StudentResourcesPage({ onBack, onLogout, onNavigate, user }) {
   const handleHeaderNavigate = (item) => {
-    if (item === "Dashboard" || item === "Home") {
+    if (item === "Home") {
+      onNavigate?.("/");
+      return;
+    }
+
+    if (item === "Dashboard") {
       onBack();
       return;
     }

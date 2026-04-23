@@ -9,7 +9,12 @@ import IncidentTicketsPage from "../incidents/IncidentTicketsPage";
 function AdminDashboard({ user, onLogout, onNavigate, path }) {
   const editMatch = path.match(/^\/admin\/resources\/edit\/(.+)$/);
   const handleHeaderNavigate = (item) => {
-    if (item === "Dashboard" || item === "Home") {
+    if (item === "Home") {
+      onNavigate("/");
+      return;
+    }
+
+    if (item === "Dashboard") {
       onNavigate("/admin/dashboard");
       return;
     }

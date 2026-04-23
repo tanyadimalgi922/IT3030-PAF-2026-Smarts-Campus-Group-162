@@ -6,7 +6,12 @@ import IncidentTicketsPage from "../incidents/IncidentTicketsPage";
 
 function StudentDashboard({ user, onLogout, onNavigate, path }) {
   const handleHeaderNavigate = (item) => {
-    if (item === "Dashboard" || item === "Home") {
+    if (item === "Home") {
+      onNavigate("/");
+      return;
+    }
+
+    if (item === "Dashboard") {
       onNavigate("/student/dashboard");
       return;
     }

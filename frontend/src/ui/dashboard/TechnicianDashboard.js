@@ -5,7 +5,12 @@ import TechnicianIncidentWorkspacePage from "../incidents/TechnicianIncidentWork
 
 function TechnicianDashboard({ user, onLogout, onNavigate, path }) {
   const handleHeaderNavigate = (item) => {
-    if (item === "Dashboard" || item === "Home") {
+    if (item === "Home") {
+      onNavigate("/");
+      return;
+    }
+
+    if (item === "Dashboard") {
       onNavigate("/technician/dashboard");
       return;
     }

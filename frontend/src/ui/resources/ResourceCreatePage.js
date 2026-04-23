@@ -31,7 +31,12 @@ function ResourceCreatePage({ onBack, onLogout, onNavigate, resourceId, user }) 
   const today = getTodayDate();
   const isEquipment = form.type === "EQUIPMENT";
   const handleHeaderNavigate = (item) => {
-    if (item === "Dashboard" || item === "Home") {
+    if (item === "Home") {
+      onNavigate?.("/");
+      return;
+    }
+
+    if (item === "Dashboard") {
       onNavigate?.("/admin/dashboard");
       return;
     }
