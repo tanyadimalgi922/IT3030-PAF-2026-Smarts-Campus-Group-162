@@ -6,17 +6,22 @@ import IncidentTicketsPage from "../incidents/IncidentTicketsPage";
 
 function StudentDashboard({ user, onLogout, onNavigate, path }) {
   const handleHeaderNavigate = (item) => {
+    if (item === "Dashboard" || item === "Home") {
+      onNavigate("/student/dashboard");
+      return;
+    }
+
+    if (item === "About Us") {
+      onNavigate("/about");
+      return;
+    }
+
     if (item === "Resources") {
       onNavigate("/student/resources");
       return;
     }
 
-    if (item === "Home") {
-      onNavigate("/student/dashboard");
-      return;
-    }
-
-    onNavigate(item);
+    onNavigate("/student/dashboard");
   };
 
   if (path === "/student/resources") {
@@ -33,7 +38,7 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
   if (path === "/student/bookings") {
     return (
       <main className="auth-shell min-h-screen text-campus-ink">
-        <CampusHeader active="Home" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+        <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
         <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
           <div className="dark-hero rounded-[2rem] p-7 text-white shadow-panel sm:p-10">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -71,7 +76,7 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
 
     return (
       <main className="auth-shell min-h-screen text-campus-ink">
-        <CampusHeader active="Home" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+        <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
         <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
           <IncidentTicketsPage
             mode="student"
@@ -86,7 +91,7 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
 
   return (
     <main className="auth-shell min-h-screen text-campus-ink">
-      <CampusHeader active="Home" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+      <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
       <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div className="rounded-[2rem] bg-white p-7 shadow-panel sm:p-10">

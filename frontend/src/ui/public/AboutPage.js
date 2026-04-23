@@ -1,9 +1,14 @@
 import CampusHeader from "../CampusHeader";
 
-function AboutPage({ onNavigate }) {
+function AboutPage({ onLogout, onNavigate, user }) {
   return (
     <main className="public-shell min-h-screen text-campus-ink">
-      <CampusHeader active="About Us" onNavigate={(item) => handlePublicNavigate(item, onNavigate)} />
+      <CampusHeader
+        active="About Us"
+        onLogout={onLogout}
+        onNavigate={(item) => handlePageNavigate(item, onNavigate, user)}
+        user={user}
+      />
 
       <section className="mx-auto max-w-7xl px-5 pb-12 pt-8 sm:px-8 lg:px-12">
         <div className="about-hero rounded-[2rem] p-7 text-white shadow-panel sm:p-10">
@@ -97,25 +102,29 @@ function AboutPage({ onNavigate }) {
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 className="primary-action min-h-12 rounded-full px-6 text-sm font-black text-white"
-                onClick={() => onNavigate("/login")}
+                onClick={() => onNavigate(user ? getDashboardPath(user.role) : "/login")}
                 type="button"
               >
-                Sign In
+                {user ? "Back to Dashboard" : "Sign In"}
               </button>
-              <button
-                className="min-h-12 rounded-full border border-blue-200 bg-white px-6 text-sm font-black text-campus-navy"
-                onClick={() => onNavigate("/register/student")}
-                type="button"
-              >
-                Create Student Account
-              </button>
-              <button
-                className="min-h-12 rounded-full border border-blue-200 bg-white px-6 text-sm font-black text-campus-navy"
-                onClick={() => onNavigate("/register/technician")}
-                type="button"
-              >
-                Create Technician Account
-              </button>
+              {!user && (
+                <>
+                  <button
+                    className="min-h-12 rounded-full border border-blue-200 bg-white px-6 text-sm font-black text-campus-navy"
+                    onClick={() => onNavigate("/register/student")}
+                    type="button"
+                  >
+                    Create Student Account
+                  </button>
+                  <button
+                    className="min-h-12 rounded-full border border-blue-200 bg-white px-6 text-sm font-black text-campus-navy"
+                    onClick={() => onNavigate("/register/technician")}
+                    type="button"
+                  >
+                    Create Technician Account
+                  </button>
+                </>
+              )}
             </div>
           </section>
         </div>
@@ -124,12 +133,19 @@ function AboutPage({ onNavigate }) {
   );
 }
 
-function handlePublicNavigate(item, onNavigate) {
+function handlePageNavigate(item, onNavigate, user) {
   if (item === "Home") onNavigate("/");
+  if (item === "Dashboard") onNavigate(getDashboardPath(user?.role));
   if (item === "About Us") onNavigate("/about");
-  if (item === "Resources") onNavigate("/login");
+  if (item === "Resources") onNavigate(user ? getDashboardPath(user.role) : "/login");
   if (item === "Sign in") onNavigate("/login");
-  if (item === "Get started") onNavigate("/register/student");
+  if (item === "Get started") onNavigate(user ? getDashboardPath(user.role) : "/register/student");
+}
+
+function getDashboardPath(role) {
+  if (role === "STUDENT") return "/student/dashboard";
+  if (role === "TECHNICIAN") return "/technician/dashboard";
+  return "/admin/dashboard";
 }
 
 function AboutStat({ label, value }) {

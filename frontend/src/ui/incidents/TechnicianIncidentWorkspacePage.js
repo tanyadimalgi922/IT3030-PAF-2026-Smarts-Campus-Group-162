@@ -3,8 +3,13 @@ import IncidentTicketsPage from "./IncidentTicketsPage";
 
 function TechnicianIncidentWorkspacePage({ onLogout, onNavigate, user }) {
   const handleHeaderNavigate = (item) => {
-    if (item === "Home") {
+    if (item === "Dashboard" || item === "Home") {
       onNavigate("/technician/dashboard");
+      return;
+    }
+
+    if (item === "About Us") {
+      onNavigate("/about");
       return;
     }
 
@@ -18,7 +23,7 @@ function TechnicianIncidentWorkspacePage({ onLogout, onNavigate, user }) {
 
   return (
     <main className="auth-shell min-h-screen text-campus-ink">
-      <CampusHeader active="Home" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+      <CampusHeader active="Dashboard" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
       <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
         <IncidentTicketsPage mode="technician" onBack={() => onNavigate("/technician/dashboard")} user={user} />
       </section>

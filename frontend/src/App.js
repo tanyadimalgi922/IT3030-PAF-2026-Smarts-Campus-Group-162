@@ -64,7 +64,7 @@ function App() {
   }
 
   if (path === routes.about) {
-    return <AboutPage onNavigate={navigate} />;
+    return <AboutPage onLogout={handleLogout} onNavigate={navigate} user={currentUser} />;
   }
 
   return (

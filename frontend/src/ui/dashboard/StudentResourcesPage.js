@@ -4,8 +4,13 @@ import ResourceBrowser from "../resources/ResourceBrowser";
 
 function StudentResourcesPage({ onBack, onLogout, onNavigate, user }) {
   const handleHeaderNavigate = (item) => {
-    if (item === "Home") {
+    if (item === "Dashboard" || item === "Home") {
       onBack();
+      return;
+    }
+
+    if (item === "About Us") {
+      onNavigate?.("/about");
       return;
     }
 
@@ -13,7 +18,7 @@ function StudentResourcesPage({ onBack, onLogout, onNavigate, user }) {
       return;
     }
 
-    onNavigate?.(item);
+    onNavigate?.("/student/dashboard");
   };
 
   return (
