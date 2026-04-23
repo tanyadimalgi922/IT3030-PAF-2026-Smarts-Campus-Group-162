@@ -4,6 +4,7 @@ import ResourceTypeChart from "./ResourceTypeChart";
 import AdminResourceManager from "../resources/AdminResourceManager";
 import ResourceCreatePage from "../resources/ResourceCreatePage";
 import AdminBookingManager from "../bookings/AdminBookingManager";
+import IncidentTicketsPage from "../incidents/IncidentTicketsPage";
 
 function AdminDashboard({ user, onLogout, onNavigate, path }) {
   const editMatch = path.match(/^\/admin\/resources\/edit\/(.+)$/);
@@ -48,6 +49,17 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
           </div>
 
           <AdminBookingManager user={user} />
+        </section>
+      </main>
+    );
+  }
+
+  if (path === "/admin/incidents") {
+    return (
+      <main className="auth-shell min-h-screen text-campus-ink">
+        <CampusHeader active="Home" onLogout={onLogout} user={user} />
+        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+          <IncidentTicketsPage mode="admin" onBack={() => onNavigate("/admin/dashboard")} user={user} />
         </section>
       </main>
     );
@@ -110,13 +122,14 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
               {[
                 ["Resources", () => onNavigate("/admin/resources/create")],
                 ["Bookings", () => onNavigate("/admin/bookings")],
+                ["Incidents", () => onNavigate("/admin/incidents")],
                 ["Reports", null],
                 ["Support", null],
               ].map(([label, action]) => (
                 <button
                   key={label}
                   className={`min-h-20 rounded-2xl border border-white/20 px-4 text-sm font-black transition ${
-                    ["Resources", "Bookings"].includes(label) ? "bg-white text-campus-navy" : "bg-white/8 text-white hover:bg-white/14"
+                    ["Resources", "Bookings", "Incidents"].includes(label) ? "bg-white text-campus-navy" : "bg-white/8 text-white hover:bg-white/14"
                   }`}
                   onClick={action || undefined}
                   type="button"
@@ -131,7 +144,7 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <InfoCard label="Admin name" value={user.fullName} />
           <InfoCard label="System area" value={user.specialization} />
-          <InfoCard label="Workspace" value="Resources, bookings, and incidents" />
+          <InfoCard label="Workspace" value="Resources, bookings, incident routing" />
         </div>
 
         <ResourceTypeChart />

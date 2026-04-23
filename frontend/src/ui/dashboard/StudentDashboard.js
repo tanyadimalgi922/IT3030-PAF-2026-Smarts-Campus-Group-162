@@ -2,6 +2,7 @@ import CampusHeader from "../CampusHeader";
 import InfoCard from "./InfoCard";
 import StudentBookingList from "../bookings/StudentBookingList";
 import StudentResourcesPage from "./StudentResourcesPage";
+import IncidentTicketsPage from "../incidents/IncidentTicketsPage";
 
 function StudentDashboard({ user, onLogout, onNavigate, path }) {
   const handleHeaderNavigate = (item) => {
@@ -63,6 +64,26 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
     );
   }
 
+  if (path === "/student/tickets" || path.startsWith("/student/tickets/create/")) {
+    const preselectedResourceId = path.startsWith("/student/tickets/create/")
+      ? path.replace("/student/tickets/create/", "")
+      : "";
+
+    return (
+      <main className="auth-shell min-h-screen text-campus-ink">
+        <CampusHeader active="Home" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+          <IncidentTicketsPage
+            mode="student"
+            onBack={() => onNavigate("/student/dashboard")}
+            preselectedResourceId={preselectedResourceId}
+            user={user}
+          />
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="auth-shell min-h-screen text-campus-ink">
       <CampusHeader active="Home" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
@@ -102,6 +123,13 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
               >
                 My Bookings
               </button>
+              <button
+                className="min-h-12 rounded-md border border-blue-200 bg-white px-6 text-sm font-black text-campus-navy transition hover:border-campus-blue hover:text-campus-blue"
+                onClick={() => onNavigate("/student/tickets")}
+                type="button"
+              >
+                Incident Tickets
+              </button>
             </div>
           </div>
 
@@ -123,7 +151,7 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <InfoCard label="Full name" value={user.fullName} />
           <InfoCard label="Role" value="Student" />
-          <InfoCard label="Access" value="Facilities and asset bookings" />
+          <InfoCard label="Access" value="Facilities, bookings, and incident reporting" />
         </div>
       </section>
     </main>

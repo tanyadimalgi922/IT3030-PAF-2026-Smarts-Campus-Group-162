@@ -1,7 +1,19 @@
 import CampusHeader from "../CampusHeader";
 import InfoCard from "./InfoCard";
+import IncidentTicketsPage from "../incidents/IncidentTicketsPage";
 
-function TechnicianDashboard({ user, onLogout }) {
+function TechnicianDashboard({ user, onLogout, onNavigate, path }) {
+  if (path === "/technician/tickets") {
+    return (
+      <main className="auth-shell min-h-screen text-campus-ink">
+        <CampusHeader active="Home" onLogout={onLogout} user={user} />
+        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+          <IncidentTicketsPage mode="technician" onBack={() => onNavigate("/technician/dashboard")} user={user} />
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="auth-shell min-h-screen text-campus-ink">
       <CampusHeader active="Home" onLogout={onLogout} user={user} />
@@ -18,7 +30,7 @@ function TechnicianDashboard({ user, onLogout }) {
               Track your service role and prepare for incident handling workflows.
             </p>
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <Metric label="Open work" value="0" />
+              <Metric label="Open work" value="Queue" />
               <Metric label="Today" value="Ready" />
               <Metric label="Status" value="Available" />
             </div>
@@ -38,14 +50,18 @@ function TechnicianDashboard({ user, onLogout }) {
         </div>
 
         <div className="mt-6 rounded-[2rem] border border-blue-100 bg-white p-6 shadow-sm">
-          <p className="text-sm font-black uppercase tracking-[0.22em] text-campus-blue">
-            Next Module Preview
-          </p>
+          <p className="text-sm font-black uppercase tracking-[0.22em] text-campus-blue">Assigned Work</p>
           <h2 className="mt-3 text-3xl font-black text-campus-navy">Incident queue workspace</h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-            This area is ready for fault reports, technician updates, and resolution records in the
-            maintenance module.
+            Open your assigned tickets, add progress notes, and move work toward resolution.
           </p>
+          <button
+            className="primary-action mt-5 min-h-12 rounded-2xl px-6 text-sm font-black text-white"
+            onClick={() => onNavigate("/technician/tickets")}
+            type="button"
+          >
+            View Assigned Tickets
+          </button>
         </div>
       </section>
     </main>

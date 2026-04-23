@@ -45,7 +45,7 @@ function StudentResourcesPage({ onBack, onLogout, onNavigate, user }) {
         </div>
 
         <CampusMapView />
-        <ResourceBrowser bookingMode user={user} />
+        <ResourceBrowser bookingMode onReportIncident={(resourceId) => onNavigate?.(`/student/tickets/create/${resourceId}`)} user={user} />
       </section>
     </main>
   );

@@ -10,9 +10,12 @@ const routes = {
   studentDashboard: "/student/dashboard",
   studentResources: "/student/resources",
   studentBookings: "/student/bookings",
+  studentTickets: "/student/tickets",
   technicianDashboard: "/technician/dashboard",
+  technicianTickets: "/technician/tickets",
   adminDashboard: "/admin/dashboard",
   adminBookings: "/admin/bookings",
+  adminIncidents: "/admin/incidents",
   adminCreateResource: "/admin/resources/create",
   adminEditResource: "/admin/resources/edit",
 };
@@ -104,11 +107,16 @@ function isDashboardPath(path) {
     routes.studentDashboard,
     routes.studentResources,
     routes.studentBookings,
+    routes.studentTickets,
     routes.technicianDashboard,
+    routes.technicianTickets,
     routes.adminDashboard,
     routes.adminBookings,
+    routes.adminIncidents,
     routes.adminCreateResource,
-  ].includes(path) || path.startsWith(`${routes.adminEditResource}/`);
+  ].includes(path)
+    || path.startsWith(`${routes.studentTickets}/create/`)
+    || path.startsWith(`${routes.adminEditResource}/`);
 }
 
 function getStoredUser() {
