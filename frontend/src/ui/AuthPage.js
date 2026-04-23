@@ -77,6 +77,9 @@ function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
       <CampusHeader
         active={activeTab === "login" ? "Home" : "Resources"}
         onNavigate={(item) => {
+          if (item === "Home") onNavigateTab("home");
+          if (item === "About Us") onNavigateTab("about");
+          if (item === "Resources") onNavigateTab("login");
           if (item === "Get started") onNavigateTab("student");
           if (item === "Sign in") onNavigateTab("login");
         }}

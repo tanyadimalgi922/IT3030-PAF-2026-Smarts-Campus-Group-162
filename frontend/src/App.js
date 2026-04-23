@@ -2,8 +2,12 @@ import React from "react";
 import "./App.css";
 import AuthPage from "./ui/AuthPage";
 import Dashboard from "./ui/Dashboard";
+import AboutPage from "./ui/public/AboutPage";
+import HomePage from "./ui/public/HomePage";
 
 const routes = {
+  home: "/",
+  about: "/about",
   login: "/login",
   studentRegister: "/register/student",
   technicianRegister: "/register/technician",
@@ -55,6 +59,14 @@ function App() {
     return <Dashboard onLogout={handleLogout} onNavigate={navigate} path={path} user={currentUser} />;
   }
 
+  if (path === routes.home) {
+    return <HomePage onNavigate={navigate} />;
+  }
+
+  if (path === routes.about) {
+    return <AboutPage onNavigate={navigate} />;
+  }
+
   return (
     <AuthPage
       initialTab={getAuthTab(path)}
@@ -81,7 +93,7 @@ function usePath() {
 }
 
 function normalizePath(path) {
-  return path && path !== "/" ? path : routes.login;
+  return path || routes.home;
 }
 
 function getAuthTab(path) {
@@ -91,6 +103,8 @@ function getAuthTab(path) {
 }
 
 function getAuthPath(tab) {
+  if (tab === "home") return routes.home;
+  if (tab === "about") return routes.about;
   if (tab === "student") return routes.studentRegister;
   if (tab === "technician") return routes.technicianRegister;
   return routes.login;

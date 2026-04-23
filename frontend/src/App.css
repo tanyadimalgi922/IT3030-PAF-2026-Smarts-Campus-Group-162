@@ -5,6 +5,13 @@
     linear-gradient(135deg, #f7fbff 0%, #eef6ff 44%, #dbeeff 100%);
 }
 
+.public-shell {
+  background:
+    radial-gradient(circle at 14% 12%, rgba(254, 215, 102, 0.2), transparent 24%),
+    radial-gradient(circle at 88% 18%, rgba(79, 156, 255, 0.18), transparent 26%),
+    linear-gradient(145deg, #f9fbff 0%, #eef4ff 46%, #e7f0ff 100%);
+}
+
 .campus-header {
   background: linear-gradient(90deg, #070d1d 0%, #111a2d 48%, #1a2638 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -61,6 +68,26 @@
   background:
     radial-gradient(circle at 92% 16%, rgba(112, 205, 255, 0.36), transparent 30%),
     linear-gradient(135deg, #15213b 0%, #174a9c 48%, #27a9e8 100%);
+}
+
+.public-hero-card {
+  background:
+    radial-gradient(circle at 86% 18%, rgba(255, 212, 94, 0.28), transparent 24%),
+    radial-gradient(circle at 16% 86%, rgba(93, 188, 255, 0.2), transparent 25%),
+    linear-gradient(140deg, #09111f 0%, #102444 46%, #1d62c9 100%);
+}
+
+.public-ribbon {
+  background:
+    radial-gradient(circle at 86% 22%, rgba(255, 203, 88, 0.26), transparent 24%),
+    linear-gradient(135deg, #112039 0%, #1f3f74 48%, #0f7dc0 100%);
+}
+
+.about-hero {
+  background:
+    radial-gradient(circle at 82% 18%, rgba(255, 191, 73, 0.3), transparent 22%),
+    radial-gradient(circle at 12% 88%, rgba(91, 174, 255, 0.16), transparent 24%),
+    linear-gradient(135deg, #0b1120 0%, #1a2d54 48%, #2a78d2 100%);
 }
 
 .serif-display {
