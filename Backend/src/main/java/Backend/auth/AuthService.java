@@ -46,7 +46,16 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         if (ADMIN_EMAIL.equalsIgnoreCase(request.email()) && ADMIN_PASSWORD.equals(request.password())) {
-            return new AuthResponse(ADMIN_ID, ADMIN_NAME, ADMIN_EMAIL, UserRole.ADMIN, "Admin login successful.");
+            return new AuthResponse(
+                    ADMIN_ID,
+                    ADMIN_NAME,
+                    ADMIN_EMAIL,
+                    UserRole.ADMIN,
+                    null,
+                    null,
+                    "Campus operations administration",
+                    "Admin login successful."
+            );
         }
 
         UserAccount user = userAccountRepository.findByEmailIgnoreCase(request.email())
@@ -60,6 +69,15 @@ public class AuthService {
     }
 
     private AuthResponse toResponse(UserAccount user, String message) {
-        return new AuthResponse(user.getId(), user.getFullName(), user.getEmail(), user.getRole(), message);
+        return new AuthResponse(
+                user.getId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getRegistrationNumber(),
+                user.getFaculty(),
+                user.getSpecialization(),
+                message
+        );
     }
 }

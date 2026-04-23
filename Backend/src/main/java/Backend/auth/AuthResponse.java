@@ -7,6 +7,9 @@ public record AuthResponse(
         String fullName,
         String email,
         UserRole role,
+        String registrationNumber,
+        String faculty,
+        String specialization,
         String message
 ) {
 }

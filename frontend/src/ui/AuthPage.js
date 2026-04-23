@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { login, registerStudent, registerTechnician } from "../api/authApi";
+import Dashboard from "./Dashboard";
 import Field from "./Field";
 
 const tabs = [
@@ -21,7 +22,6 @@ const emptyForms = {
     fullName: "",
     email: "",
     password: "",
-    employeeId: "",
     specialization: "",
   },
 };
@@ -31,6 +31,7 @@ function AuthPage() {
   const [forms, setForms] = useState(emptyForms);
   const [status, setStatus] = useState({ tone: "idle", message: "" });
   const [loading, setLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const title = useMemo(() => {
     if (activeTab === "student") return "Create student account";
@@ -60,6 +61,7 @@ function AuthPage() {
         tone: "success",
         message: `${data.message} Welcome ${data.fullName} (${data.role}).`,
       });
+      setCurrentUser(data);
     } catch (error) {
       setStatus({ tone: "error", message: error.message });
     } finally {
@@ -67,11 +69,24 @@ function AuthPage() {
     }
   };
 
+  if (currentUser) {
+    return (
+      <Dashboard
+        onLogout={() => {
+          setCurrentUser(null);
+          setActiveTab("login");
+          setStatus({ tone: "idle", message: "" });
+        }}
+        user={currentUser}
+      />
+    );
+  }
+
   return (
     <main className="auth-shell min-h-screen px-5 py-8 text-campus-ink sm:px-8 lg:px-12">
       <section className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="max-w-xl">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-campus-teal">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-campus-blue">
             Smart Campus Operations Hub
           </p>
           <h1 className="text-4xl font-black leading-tight text-campus-ink sm:text-5xl">
@@ -89,7 +104,7 @@ function AuthPage() {
               ["C", "Maintenance tracking"],
             ].map(([code, label]) => (
               <div key={code} className="rounded-lg border border-white/80 bg-white/70 p-4 shadow-sm">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-campus-navy text-sm font-black text-white">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-campus-blue text-sm font-black text-white">
                   {code}
                 </span>
                 <p className="mt-3 text-sm font-bold text-campus-navy">{label}</p>
@@ -105,7 +120,7 @@ function AuthPage() {
                 key={tab.id}
                 className={`min-h-11 flex-1 rounded-md px-3 text-sm font-bold transition ${
                   activeTab === tab.id
-                    ? "bg-campus-teal text-white shadow-sm"
+                    ? "bg-campus-blue text-white shadow-sm"
                     : "text-campus-navy hover:bg-white"
                 }`}
                 onClick={() => {
@@ -139,7 +154,7 @@ function AuthPage() {
             <Field
               label="Email address"
               onChange={(value) => handleChange(activeTab, "email", value)}
-              placeholder="name@campus.lk"
+              placeholder="studentname@gmail.com"
               type="email"
               value={forms[activeTab].email}
             />
@@ -157,7 +172,9 @@ function AuthPage() {
                 <Field
                   label="Registration number"
                   onChange={(value) => handleChange("student", "registrationNumber", value)}
-                  placeholder="IT3030/2026/001"
+                  pattern="it23[0-9]{6}"
+                  placeholder="it23123456"
+                  title="Use format it23xxxxxx, for example it23123456"
                   value={forms.student.registrationNumber}
                 />
                 <Field
@@ -170,13 +187,7 @@ function AuthPage() {
             )}
 
             {activeTab === "technician" && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field
-                  label="Employee ID"
-                  onChange={(value) => handleChange("technician", "employeeId", value)}
-                  placeholder="TECH-001"
-                  value={forms.technician.employeeId}
-                />
+              <div className="grid gap-4">
                 <Field
                   label="Specialization"
                   onChange={(value) => handleChange("technician", "specialization", value)}
@@ -199,7 +210,7 @@ function AuthPage() {
             )}
 
             <button
-              className="mt-2 min-h-12 rounded-md bg-campus-coral px-5 text-base font-black text-white transition hover:bg-[#d95846] disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-2 min-h-12 rounded-md bg-campus-blue px-5 text-base font-black text-white transition hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:opacity-70"
               disabled={loading}
               type="submit"
             >

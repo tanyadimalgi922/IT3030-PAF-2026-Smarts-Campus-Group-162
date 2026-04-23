@@ -1,12 +1,12 @@
 .auth-shell {
   background:
-    radial-gradient(circle at 12% 18%, rgba(14, 124, 123, 0.18), transparent 28%),
-    radial-gradient(circle at 85% 10%, rgba(244, 185, 66, 0.18), transparent 24%),
-    linear-gradient(135deg, #f6f8fb 0%, #e9f3f1 48%, #f7efe5 100%);
+    radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.18), transparent 28%),
+    radial-gradient(circle at 85% 10%, rgba(14, 165, 233, 0.16), transparent 24%),
+    linear-gradient(135deg, #ffffff 0%, #eff6ff 48%, #dbeafe 100%);
 }
 
 .field-label {
-  color: #173b57;
+  color: #0b2e59;
   display: block;
   font-size: 0.83rem;
   font-weight: 700;
@@ -15,9 +15,9 @@
 
 .field-input {
   background: #ffffff;
-  border: 1px solid #d7e1e8;
+  border: 1px solid #bfdbfe;
   border-radius: 0.5rem;
-  color: #102033;
+  color: #0f172a;
   font-size: 0.95rem;
   outline: none;
   padding: 0.72rem 0.85rem;
@@ -26,6 +26,6 @@
 }
 
 .field-input:focus {
-  border-color: #0e7c7b;
-  box-shadow: 0 0 0 4px rgba(14, 124, 123, 0.12);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
 }
