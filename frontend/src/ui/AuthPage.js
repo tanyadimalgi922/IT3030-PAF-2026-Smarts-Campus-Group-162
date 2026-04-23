@@ -1,6 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { login, registerStudent, registerTechnician } from "../api/authApi";
-import Dashboard from "./Dashboard";
 import Field from "./Field";
 
 const tabs = [
@@ -26,12 +25,15 @@ const emptyForms = {
   },
 };
 
-function AuthPage() {
-  const [activeTab, setActiveTab] = useState("login");
+function AuthPage({ initialTab = "login", onAuthenticated, onNavigateTab }) {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [forms, setForms] = useState(emptyForms);
   const [status, setStatus] = useState({ tone: "idle", message: "" });
   const [loading, setLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   const title = useMemo(() => {
     if (activeTab === "student") return "Create student account";
@@ -61,26 +63,13 @@ function AuthPage() {
         tone: "success",
         message: `${data.message} Welcome ${data.fullName} (${data.role}).`,
       });
-      setCurrentUser(data);
+      onAuthenticated(data);
     } catch (error) {
       setStatus({ tone: "error", message: error.message });
     } finally {
       setLoading(false);
     }
   };
-
-  if (currentUser) {
-    return (
-      <Dashboard
-        onLogout={() => {
-          setCurrentUser(null);
-          setActiveTab("login");
-          setStatus({ tone: "idle", message: "" });
-        }}
-        user={currentUser}
-      />
-    );
-  }
 
   return (
     <main className="auth-shell min-h-screen px-5 py-8 text-campus-ink sm:px-8 lg:px-12">
@@ -126,6 +115,7 @@ function AuthPage() {
                 onClick={() => {
                   setActiveTab(tab.id);
                   setStatus({ tone: "idle", message: "" });
+                  onNavigateTab(tab.id);
                 }}
                 type="button"
               >
