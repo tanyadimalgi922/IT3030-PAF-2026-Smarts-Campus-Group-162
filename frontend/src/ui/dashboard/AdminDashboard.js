@@ -1,5 +1,6 @@
 import CampusHeader from "../CampusHeader";
 import InfoCard from "./InfoCard";
+import ResourceTypeChart from "./ResourceTypeChart";
 import AdminResourceManager from "../resources/AdminResourceManager";
 import ResourceCreatePage from "../resources/ResourceCreatePage";
 
@@ -95,6 +96,7 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
           <InfoCard label="Workspace" value="Resources, bookings, and incidents" />
         </div>
 
+        <ResourceTypeChart />
         <AdminResourceManager onCreate={() => onNavigate("/admin/resources/create")} />
       </section>
     </main>
