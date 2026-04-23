@@ -1,7 +1,69 @@
-main {
-  isolation: isolate;
+.auth-shell {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(46, 144, 250, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 14%, rgba(124, 194, 255, 0.18), transparent 28%),
+    linear-gradient(135deg, #f7fbff 0%, #eef6ff 44%, #dbeeff 100%);
 }
 
-input::placeholder {
-  color: #94a3b8;
+.campus-header {
+  background: linear-gradient(90deg, #070d1d 0%, #111a2d 48%, #1a2638 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.campus-logo {
+  background: linear-gradient(135deg, #6fd2ff 0%, #1f82ff 55%, #174ea6 100%);
+  box-shadow: 0 14px 30px rgba(31, 130, 255, 0.28);
+}
+
+.field-label {
+  color: #12345c;
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.field-input {
+  background: #f8fbff;
+  border: 1px solid #d4e2f2;
+  border-radius: 0.85rem;
+  color: #0e2340;
+  font-size: 0.95rem;
+  outline: none;
+  padding: 0.72rem 0.85rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  width: 100%;
+}
+
+.field-input:focus {
+  border-color: #1f82ff;
+  box-shadow: 0 0 0 4px rgba(31, 130, 255, 0.14);
+}
+
+.primary-action {
+  background: linear-gradient(135deg, #123f7a 0%, #1f82ff 100%);
+  box-shadow: 0 16px 34px rgba(18, 63, 122, 0.24);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(212, 226, 242, 0.95);
+  backdrop-filter: blur(18px);
+}
+
+.dark-hero {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(47, 143, 255, 0.45), transparent 30%),
+    linear-gradient(135deg, #080e1f 0%, #132044 52%, #2859c8 100%);
+}
+
+.blue-hero {
+  background:
+    radial-gradient(circle at 92% 16%, rgba(112, 205, 255, 0.36), transparent 30%),
+    linear-gradient(135deg, #15213b 0%, #174a9c 48%, #27a9e8 100%);
+}
+
+.serif-display {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0;
 }
