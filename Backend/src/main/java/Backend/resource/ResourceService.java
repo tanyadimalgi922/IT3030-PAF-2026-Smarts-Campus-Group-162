@@ -15,9 +15,11 @@ import java.util.Objects;
 public class ResourceService {
 
     private final CampusResourceRepository campusResourceRepository;
+    private final ResourceReviewService resourceReviewService;
 
-    public ResourceService(CampusResourceRepository campusResourceRepository) {
+    public ResourceService(CampusResourceRepository campusResourceRepository, ResourceReviewService resourceReviewService) {
         this.campusResourceRepository = campusResourceRepository;
+        this.resourceReviewService = resourceReviewService;
     }
 
     public CampusResource create(CampusResource resource) {
@@ -29,8 +31,8 @@ public class ResourceService {
     }
 
     public CampusResource getById(String id) {
-        return campusResourceRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Resource not found."));
+        return enrich(campusResourceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Resource not found.")));
     }
 
     public CampusResource update(String id, CampusResource resource) {
@@ -67,7 +69,15 @@ public class ResourceService {
                         CampusResource::getCreatedAt,
                         Comparator.nullsLast(Comparator.naturalOrder())
                 ).reversed())
+                .map(this::enrich)
                 .toList();
+    }
+
+    private CampusResource enrich(CampusResource resource) {
+        resource.setAverageRating(resourceReviewService.getAverageRating(resource.getId()));
+        resource.setReviewCount(resourceReviewService.getReviewCount(resource.getId()));
+        resource.setRecentReviews(resourceReviewService.findReviewsForResource(resource.getId(), 3));
+        return resource;
     }
 
     private boolean matchesSearch(CampusResource resource, String search) {

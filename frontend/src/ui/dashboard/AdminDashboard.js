@@ -3,6 +3,7 @@ import InfoCard from "./InfoCard";
 import ResourceTypeChart from "./ResourceTypeChart";
 import AdminResourceManager from "../resources/AdminResourceManager";
 import ResourceCreatePage from "../resources/ResourceCreatePage";
+import AdminBookingManager from "../bookings/AdminBookingManager";
 
 function AdminDashboard({ user, onLogout, onNavigate, path }) {
   const editMatch = path.match(/^\/admin\/resources\/edit\/(.+)$/);
@@ -15,6 +16,40 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
         resourceId={editMatch?.[1]}
         user={user}
       />
+    );
+  }
+
+  if (path === "/admin/bookings") {
+    return (
+      <main className="auth-shell min-h-screen text-campus-ink">
+        <CampusHeader active="Home" onLogout={onLogout} user={user} />
+        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+          <div className="dark-hero rounded-[2rem] p-6 text-white shadow-panel sm:p-9">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.32em] text-sky-200">
+                  Admin Bookings
+                </p>
+                <h1 className="mt-4 text-4xl font-black sm:text-5xl">
+                  Review booking requests in one focused page.
+                </h1>
+                <p className="mt-4 max-w-3xl text-base leading-7 text-white/82">
+                  Approve, reject, and cancel requests here without crowding the main admin dashboard.
+                </p>
+              </div>
+              <button
+                className="min-h-12 rounded-2xl bg-white px-6 text-sm font-black text-campus-navy"
+                onClick={() => onNavigate("/admin/dashboard")}
+                type="button"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+
+          <AdminBookingManager user={user} />
+        </section>
+      </main>
     );
   }
 
@@ -74,14 +109,14 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
             <div className="grid grid-cols-2 gap-3">
               {[
                 ["Resources", () => onNavigate("/admin/resources/create")],
-                ["Bookings", null],
+                ["Bookings", () => onNavigate("/admin/bookings")],
                 ["Reports", null],
                 ["Support", null],
               ].map(([label, action]) => (
                 <button
                   key={label}
                   className={`min-h-20 rounded-2xl border border-white/20 px-4 text-sm font-black transition ${
-                    label === "Resources" ? "bg-white text-campus-navy" : "bg-white/8 text-white hover:bg-white/14"
+                    ["Resources", "Bookings"].includes(label) ? "bg-white text-campus-navy" : "bg-white/8 text-white hover:bg-white/14"
                   }`}
                   onClick={action || undefined}
                   type="button"

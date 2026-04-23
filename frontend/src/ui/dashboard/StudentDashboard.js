@@ -1,8 +1,23 @@
 import CampusHeader from "../CampusHeader";
 import InfoCard from "./InfoCard";
+import StudentBookingList from "../bookings/StudentBookingList";
 import StudentResourcesPage from "./StudentResourcesPage";
 
 function StudentDashboard({ user, onLogout, onNavigate, path }) {
+  const handleHeaderNavigate = (item) => {
+    if (item === "Resources") {
+      onNavigate("/student/resources");
+      return;
+    }
+
+    if (item === "Home") {
+      onNavigate("/student/dashboard");
+      return;
+    }
+
+    onNavigate(item);
+  };
+
   if (path === "/student/resources") {
     return (
       <StudentResourcesPage
@@ -14,11 +29,39 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
     );
   }
 
-  const handleHeaderNavigate = (item) => {
-    if (item === "Resources") {
-      onNavigate("/student/resources");
-    }
-  };
+  if (path === "/student/bookings") {
+    return (
+      <main className="auth-shell min-h-screen text-campus-ink">
+        <CampusHeader active="Home" onLogout={onLogout} onNavigate={handleHeaderNavigate} user={user} />
+        <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12">
+          <div className="dark-hero rounded-[2rem] p-7 text-white shadow-panel sm:p-10">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.32em] text-sky-200">
+                  Student Bookings
+                </p>
+                <h1 className="mt-4 text-4xl font-black sm:text-5xl">
+                  View and manage your booking requests.
+                </h1>
+                <p className="mt-4 max-w-3xl text-base leading-7 text-white/80">
+                  Track pending, approved, rejected, and cancelled requests in one place.
+                </p>
+              </div>
+              <button
+                className="min-h-12 rounded-2xl bg-white px-6 text-sm font-black text-campus-navy"
+                onClick={() => onNavigate("/student/dashboard")}
+                type="button"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+
+          <StudentBookingList onNavigate={onNavigate} user={user} />
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="auth-shell min-h-screen text-campus-ink">
@@ -44,13 +87,22 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
                 {user.faculty}
               </span>
             </div>
-            <button
-              className="primary-action mt-7 min-h-12 rounded-md px-6 text-sm font-black text-white transition hover:scale-[1.01]"
-              onClick={() => onNavigate("/student/resources")}
-              type="button"
-            >
-              Resources
-            </button>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <button
+                className="primary-action min-h-12 rounded-md px-6 text-sm font-black text-white transition hover:scale-[1.01]"
+                onClick={() => onNavigate("/student/resources")}
+                type="button"
+              >
+                Resources
+              </button>
+              <button
+                className="min-h-12 rounded-md border border-blue-200 bg-white px-6 text-sm font-black text-campus-navy transition hover:border-campus-blue hover:text-campus-blue"
+                onClick={() => onNavigate("/student/bookings")}
+                type="button"
+              >
+                My Bookings
+              </button>
+            </div>
           </div>
 
           <div className="blue-hero rounded-[2rem] p-6 text-white shadow-panel sm:p-8">

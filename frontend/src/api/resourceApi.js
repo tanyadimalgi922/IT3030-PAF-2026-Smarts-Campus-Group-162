@@ -48,6 +48,27 @@ export function getResources(filters = {}) {
   return request(`/resources${query ? `?${query}` : ""}`);
 }
 
+export function getResourceReviews(filters = {}) {
+  const params = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.set(key, value);
+    }
+  });
+
+  const query = params.toString();
+  return request(`/resources/reviews${query ? `?${query}` : ""}`);
+}
+
+export function createResourceReview(resourceId, payload) {
+  return request(`/resources/${resourceId}/reviews`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
 async function readJson(response) {
   try {
     return await response.json();

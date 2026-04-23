@@ -45,7 +45,7 @@ function StudentResourcesPage({ onBack, onLogout, onNavigate, user }) {
         </div>
 
         <CampusMapView />
-        <ResourceBrowser />
+        <ResourceBrowser bookingMode user={user} />
       </section>
     </main>
   );
