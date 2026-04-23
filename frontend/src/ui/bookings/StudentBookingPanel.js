@@ -96,18 +96,18 @@ function StudentBookingPanel({ onBooked, resource, user }) {
   };
 
   return (
-    <form className="mt-4 rounded-lg border border-blue-100 bg-[#f8fbff] p-4" onSubmit={handleSubmit}>
+    <form className="mt-3 rounded-lg border border-blue-100 bg-[#f8fbff] p-3" onSubmit={handleSubmit}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-campus-violet">
+          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-campus-violet">
             Booking Slots
           </p>
-          <p className="mt-1 text-sm font-semibold text-slate-600">
+          <p className="mt-0.5 text-xs font-semibold text-slate-600">
             {formatDateLabel(date)}
           </p>
         </div>
         <input
-          className="field-input sm:max-w-44"
+          className="field-input text-xs sm:max-w-40"
           min={new Date().toISOString().slice(0, 10)}
           onChange={(event) => setDate(event.target.value)}
           type="date"
@@ -115,9 +115,9 @@ function StudentBookingPanel({ onBooked, resource, user }) {
         />
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {loading ? (
-          <div className="rounded-xl border border-blue-100 bg-white p-4 text-sm font-bold text-campus-blue">
+          <div className="rounded-xl border border-blue-100 bg-white p-3 text-xs font-bold text-campus-blue">
             Loading slots...
           </div>
         ) : slots.length > 0 ? (
@@ -134,14 +134,14 @@ function StudentBookingPanel({ onBooked, resource, user }) {
             />
           ))
         ) : (
-          <div className="col-span-full rounded-md border border-slate-200 bg-white p-3 text-sm font-bold text-slate-500">
+          <div className="col-span-full rounded-xl border border-slate-200 bg-white p-3 text-xs font-bold text-slate-500">
             No slots for this date.
           </div>
         )}
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <select className="field-input" onChange={(event) => handleSlotSelect(event.target.value)} required value={selectedSlotValue}>
+      <div className="mt-3 grid gap-2 md:grid-cols-2">
+        <select className="field-input text-xs" onChange={(event) => handleSlotSelect(event.target.value)} required value={selectedSlotValue}>
           <option value="">Select available slot</option>
           {availableSlots.map((slot) => (
             <option key={`${slot.startTime}-${slot.endTime}`} value={`${slot.startTime}|${slot.endTime}`}>
@@ -149,9 +149,9 @@ function StudentBookingPanel({ onBooked, resource, user }) {
             </option>
           ))}
         </select>
-        <input className="field-input" readOnly value={endTime ? `${startTime} - ${endTime}` : "No slot selected"} />
+        <input className="field-input text-xs" readOnly value={endTime ? `${startTime} - ${endTime}` : "No slot selected"} />
         <input
-          className="field-input"
+          className="field-input text-xs"
           min="1"
           max={resource.capacity}
           onChange={(event) => setExpectedAttendees(event.target.value)}
@@ -161,7 +161,7 @@ function StudentBookingPanel({ onBooked, resource, user }) {
           value={expectedAttendees}
         />
         <input
-          className="field-input"
+          className="field-input text-xs"
           onChange={(event) => setPurpose(event.target.value)}
           placeholder="Purpose"
           required
@@ -169,11 +169,11 @@ function StudentBookingPanel({ onBooked, resource, user }) {
         />
       </div>
 
-      {error && <p className="mt-3 text-sm font-bold text-red-700">{error}</p>}
-      {message && <p className="mt-3 text-sm font-bold text-emerald-700">{message}</p>}
+      {error && <p className="mt-2.5 text-xs font-bold text-red-700">{error}</p>}
+      {message && <p className="mt-2.5 text-xs font-bold text-emerald-700">{message}</p>}
 
       <button
-        className="primary-action mt-4 min-h-11 w-full rounded-md px-4 text-sm font-black text-white disabled:opacity-60"
+        className="primary-action mt-3 min-h-10 w-full rounded-md px-3 text-xs font-black text-white disabled:opacity-60"
         disabled={submitting || loading || !slots.some((slot) => slot.availableForRequest)}
         type="submit"
       >
@@ -187,26 +187,26 @@ function SlotCard({ onClick, selected, slot }) {
   const interactive = slot.availableForRequest;
   return (
     <button
-      className={`rounded-xl border p-4 text-left transition ${
+      className={`rounded-2xl border bg-white p-3.5 text-left transition ${
         selected
-          ? "border-campus-blue bg-white shadow-[0_0_0_2px_rgba(31,130,255,0.12)]"
-          : "border-slate-200 bg-white"
-      } ${interactive ? "hover:border-campus-blue" : "opacity-80"}`}
+          ? "border-campus-blue shadow-[0_0_0_3px_rgba(37,99,235,0.12)]"
+          : "border-slate-200 shadow-sm"
+      } ${interactive ? "hover:-translate-y-0.5 hover:border-campus-blue hover:shadow-md" : "opacity-90"}`}
       disabled={!interactive}
       onClick={onClick}
       type="button"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-lg font-black text-campus-navy">
+          <p className="text-base font-black tracking-tight text-campus-navy">
             {slot.startTime} - {slot.endTime}
           </p>
-          <p className="mt-1 text-xs font-semibold text-slate-500">
-            Booking window for {formatShortDate(slot.date)}
+          <p className="mt-1 text-[11px] font-semibold text-slate-500">
+            {formatShortDate(slot.date)} booking window
           </p>
         </div>
         <p
-          className={`rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${
             interactive
               ? "bg-emerald-50 text-emerald-700"
               : "bg-red-50 text-red-700"
@@ -216,13 +216,13 @@ function SlotCard({ onClick, selected, slot }) {
         </p>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2 text-xs sm:text-sm">
+      <div className="mt-3 grid grid-cols-3 gap-2">
         <Metric label="Left" tone="left" value={slot.leftCount} />
         <Metric label="Pending" tone="pending" value={slot.pendingCount} />
         <Metric label="Booked" tone="booked" value={slot.bookedCount} />
       </div>
 
-      <p className={`mt-4 text-sm font-bold ${interactive ? "text-emerald-700" : "text-red-700"}`}>
+      <p className={`mt-3 text-sm font-bold ${interactive ? "text-emerald-700" : "text-red-700"}`}>
         {interactive ? "Available for request" : "Slot capacity full"}
       </p>
     </button>
@@ -255,11 +255,11 @@ function Metric({ label, tone, value }) {
   };
 
   return (
-    <div className={`rounded-lg border px-3 py-2 ${palette.container}`}>
-      <p className={`text-[11px] font-black uppercase tracking-[0.08em] ${palette.label}`}>
+    <div className={`rounded-xl border px-2 py-2 text-center ${palette.container}`}>
+      <p className={`text-[9px] font-black uppercase tracking-[0.12em] ${palette.label}`}>
         {label}
       </p>
-      <p className={`mt-1 text-base font-black ${palette.value}`}>{value}</p>
+      <p className={`mt-1 text-lg leading-none font-black ${palette.value}`}>{value}</p>
     </div>
   );
 }
@@ -282,7 +282,7 @@ function formatShortDate(value) {
   const parsed = new Date(`${value}T00:00:00`);
   return parsed.toLocaleDateString("en-CA", {
     month: "short",
-    day: "2-digit",
+    day: "numeric",
   });
 }
 

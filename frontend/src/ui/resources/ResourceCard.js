@@ -7,7 +7,7 @@ function ResourceCard({ adminMode = false, bookingMode = false, onBooked, onDele
 
   return (
     <article className="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow">
-      <div className="aspect-[16/9] bg-campus-cloud">
+      <div className="aspect-[16/8] bg-campus-cloud">
         {resource.imageDataUrl ? (
           <img
             alt={resource.name}
@@ -15,20 +15,20 @@ function ResourceCard({ adminMode = false, bookingMode = false, onBooked, onDele
             src={resource.imageDataUrl}
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-sm font-bold text-campus-blue">
+          <div className="flex h-full items-center justify-center text-xs font-bold text-campus-blue">
             No image
           </div>
         )}
       </div>
 
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
+      <div className="p-3">
+        <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="text-lg font-black text-campus-ink">{resource.name}</h3>
-            <p className="mt-1 text-sm font-semibold text-slate-600">{formatType(resource.type)}</p>
+            <h3 className="text-base font-black leading-tight text-campus-ink">{resource.name}</h3>
+            <p className="mt-0.5 text-xs font-semibold text-slate-600">{formatType(resource.type)}</p>
           </div>
           <span
-            className={`rounded-md px-2 py-1 text-xs font-black ${
+            className={`rounded-md px-2 py-1 text-[11px] font-black ${
               resource.status === "ACTIVE"
                 ? "bg-emerald-50 text-emerald-700"
                 : "bg-red-50 text-red-700"
@@ -38,7 +38,7 @@ function ResourceCard({ adminMode = false, bookingMode = false, onBooked, onDele
           </span>
         </div>
 
-        <div className="mt-4 grid gap-2 text-sm text-slate-700">
+        <div className="mt-3 grid gap-1.5 text-xs text-slate-700">
           <p>
             <span className="font-bold text-campus-navy">Capacity:</span> {resource.capacity}
           </p>
@@ -55,31 +55,31 @@ function ResourceCard({ adminMode = false, bookingMode = false, onBooked, onDele
           </p>
         </div>
 
-        <div className="mt-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+        <div className="mt-3">
+          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
             Amenities
           </p>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
             {amenities.length > 0 ? (
               amenities.map((amenity) => (
                 <span
-                  className="rounded-full border border-blue-100 bg-[#f8fbff] px-3 py-1 text-xs font-bold text-campus-blue"
+                  className="rounded-full border border-blue-100 bg-[#f8fbff] px-2.5 py-0.5 text-[11px] font-bold text-campus-blue"
                   key={amenity}
                 >
                   {amenity}
                 </span>
               ))
             ) : (
-              <span className="text-sm font-semibold text-slate-500">No amenities listed</span>
+              <span className="text-xs font-semibold text-slate-500">No amenities listed</span>
             )}
           </div>
         </div>
 
-        <div className="mt-4 rounded-md bg-campus-pale p-3">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+        <div className="mt-3 rounded-md bg-campus-pale p-2.5">
+          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
             Availability
           </p>
-          <div className="mt-2 grid gap-1 text-sm font-semibold text-campus-navy">
+          <div className="mt-1.5 grid gap-1 text-xs font-semibold leading-5 text-campus-navy">
             {(resource.availabilityWindows || []).length > 0 ? (
               resource.availabilityWindows.map((window, index) => (
                 <p key={`${window.date}-${window.startTime}-${index}`}>
@@ -93,16 +93,16 @@ function ResourceCard({ adminMode = false, bookingMode = false, onBooked, onDele
         </div>
 
         {adminMode && (
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
             <button
-              className="min-h-11 rounded-md bg-campus-navy px-4 text-sm font-black text-white transition hover:bg-campus-blue"
+              className="min-h-10 rounded-md bg-campus-navy px-3 text-xs font-black text-white transition hover:bg-campus-blue"
               onClick={onEdit}
               type="button"
             >
               Update
             </button>
             <button
-              className="min-h-11 rounded-md border border-red-200 bg-red-50 px-4 text-sm font-black text-red-700 transition hover:bg-red-100"
+              className="min-h-10 rounded-md border border-red-200 bg-red-50 px-3 text-xs font-black text-red-700 transition hover:bg-red-100"
               onClick={onDelete}
               type="button"
             >
@@ -114,7 +114,7 @@ function ResourceCard({ adminMode = false, bookingMode = false, onBooked, onDele
         {bookingMode && resource.status === "ACTIVE" && (
           <>
             <button
-              className="primary-action mt-4 min-h-11 w-full rounded-md px-4 text-sm font-black text-white transition hover:scale-[1.01]"
+              className="primary-action mt-3 min-h-10 w-full rounded-md px-3 text-xs font-black text-white transition hover:scale-[1.01]"
               onClick={() => setBookingOpen((current) => !current)}
               type="button"
             >

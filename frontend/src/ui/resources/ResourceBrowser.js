@@ -146,7 +146,7 @@ function ResourceBrowser({ adminMode = false, bookingMode = false, onBooked, onE
         </div>
       )}
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {loading ? (
           <div className="rounded-lg border border-blue-100 bg-white p-5 text-sm font-bold text-campus-blue">
             Loading resources...
