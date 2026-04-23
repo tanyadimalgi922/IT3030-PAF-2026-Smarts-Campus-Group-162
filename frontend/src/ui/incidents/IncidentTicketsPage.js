@@ -352,6 +352,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
     : mode === "admin"
       ? "Monitor ticket flow, assign technicians, reject invalid requests, and close completed work."
       : "Move your assigned work from in progress to resolved and keep clear notes for admin follow-up.";
+  const studentTicketStats = mode === "student" ? getStudentTicketStats(tickets) : null;
 
   return (
     <section className="mt-6">
@@ -525,6 +526,15 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
           </select>
         )}
       </div>
+
+      {mode === "student" && tickets.length > 0 && (
+        <div className="mt-5 grid gap-4 md:grid-cols-4">
+          <StudentStatCard label="Total Tickets" tone="navy" value={studentTicketStats.total} />
+          <StudentStatCard label="Open" tone="amber" value={studentTicketStats.open} />
+          <StudentStatCard label="In Progress" tone="sky" value={studentTicketStats.inProgress} />
+          <StudentStatCard label="Resolved / Closed" tone="emerald" value={studentTicketStats.finished} />
+        </div>
+      )}
 
       {error && (
         <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">
@@ -767,8 +777,31 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
                   <InfoRow label="Contact" value={ticket.preferredContactDetails} />
                   <InfoRow label="Assigned" value={ticket.assignedTechnicianName || "Not assigned"} />
                   <InfoRow label="Created" value={formatDateTime(ticket.createdAt)} />
+                  <InfoRow label="Ticket ID" value={ticket.id} />
                 </div>
               </div>
+
+              {mode === "student" && (
+                <div className="mt-5 rounded-[1.75rem] border border-blue-100 bg-[#f8fbff] p-4 sm:p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-campus-blue">Progress</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-600">{getStudentProgressMessage(ticket)}</p>
+                    </div>
+                    <button
+                      className="min-h-11 rounded-2xl border border-campus-blue bg-white px-4 text-sm font-black text-campus-blue transition hover:bg-campus-blue hover:text-white"
+                      onClick={() => printTicket(ticket)}
+                      type="button"
+                    >
+                      Print Ticket
+                    </button>
+                  </div>
+
+                  <div className="mt-4">
+                    <TicketProgressTracker ticket={ticket} />
+                  </div>
+                </div>
+              )}
 
               {ticket.imageAttachments?.length > 0 && (
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -1097,6 +1130,57 @@ function InfoRow({ label, value }) {
   );
 }
 
+function StudentStatCard({ label, tone, value }) {
+  return (
+    <div className={`rounded-[1.5rem] border p-4 shadow-sm ${studentStatTone(tone)}`}>
+      <p className="text-xs font-black uppercase tracking-[0.16em]">{label}</p>
+      <p className="mt-3 text-3xl font-black">{value}</p>
+    </div>
+  );
+}
+
+function TicketProgressTracker({ ticket }) {
+  const steps = getTicketProgressSteps(ticket);
+
+  return (
+    <div className={`grid gap-3 ${steps.length === 4 ? "md:grid-cols-4" : "md:grid-cols-3"}`}>
+      {steps.map((step) => (
+        <div
+          className={`rounded-2xl border px-4 py-4 transition ${
+            step.completed ? "border-campus-blue bg-white shadow-sm" : "border-slate-200 bg-slate-50"
+          } ${step.rejected ? "border-red-200 bg-red-50" : ""}`}
+          key={step.key}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <span className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-black ${
+              step.completed
+                ? "bg-campus-blue text-white"
+                : step.rejected
+                  ? "bg-red-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-500"
+            }`}
+            >
+              {step.rejected ? "!" : step.order}
+            </span>
+            <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${
+              step.completed
+                ? "bg-emerald-50 text-emerald-700"
+                : step.rejected
+                  ? "bg-red-100 text-red-700"
+                  : "bg-slate-200 text-slate-600"
+            }`}
+            >
+              {step.completed ? "Done" : step.rejected ? "Stopped" : "Waiting"}
+            </span>
+          </div>
+          <p className="mt-4 text-sm font-black text-campus-navy">{step.label}</p>
+          <p className="mt-2 text-xs leading-6 text-slate-600">{step.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function getDefaultNextStatus(status, mode) {
   if (mode === "technician") {
     return getTechnicianStatusOptions(status)[0] || "";
@@ -1158,6 +1242,121 @@ function isLockedTicket(ticket) {
   return ticket?.status === "CLOSED";
 }
 
+function getStudentTicketStats(tickets) {
+  return tickets.reduce((summary, ticket) => {
+    summary.total += 1;
+
+    if (ticket.status === "OPEN") summary.open += 1;
+    if (ticket.status === "IN_PROGRESS") summary.inProgress += 1;
+    if (ticket.status === "RESOLVED" || ticket.status === "CLOSED") summary.finished += 1;
+
+    return summary;
+  }, {
+    total: 0,
+    open: 0,
+    inProgress: 0,
+    finished: 0,
+  });
+}
+
+function getTicketProgressSteps(ticket) {
+  if (ticket.status === "REJECTED") {
+    return [
+      {
+        key: "reported",
+        label: "Reported",
+        description: "Your incident was submitted successfully.",
+        completed: true,
+        order: 1,
+      },
+      {
+        key: "reviewed",
+        label: "Reviewed",
+        description: "The maintenance team checked the request details.",
+        completed: true,
+        order: 2,
+      },
+      {
+        key: "rejected",
+        label: "Rejected",
+        description: ticket.rejectionReason || "This ticket could not continue.",
+        completed: false,
+        rejected: true,
+        order: 3,
+      },
+    ];
+  }
+
+  const progressIndex = {
+    OPEN: 0,
+    IN_PROGRESS: 1,
+    RESOLVED: 2,
+    CLOSED: 3,
+  }[ticket.status] ?? 0;
+
+  return [
+    {
+      key: "reported",
+      label: "Reported",
+      description: "Your issue has been logged in the system.",
+      completed: progressIndex >= 0,
+      order: 1,
+    },
+    {
+      key: "in-progress",
+      label: "In Progress",
+      description: ticket.assignedTechnicianName
+        ? `${ticket.assignedTechnicianName} is handling this issue.`
+        : "Waiting for technician assignment and work to begin.",
+      completed: progressIndex >= 1,
+      order: 2,
+    },
+    {
+      key: "resolved",
+      label: "Resolved",
+      description: ticket.resolutionNotes || "Work is completed and waiting for final closure.",
+      completed: progressIndex >= 2,
+      order: 3,
+    },
+    {
+      key: "closed",
+      label: "Closed",
+      description: "The incident workflow is fully finished.",
+      completed: progressIndex >= 3,
+      order: 4,
+    },
+  ];
+}
+
+function getStudentProgressMessage(ticket) {
+  if (ticket.status === "OPEN") {
+    return "Your ticket has been received and is waiting for action.";
+  }
+
+  if (ticket.status === "IN_PROGRESS") {
+    return ticket.assignedTechnicianName
+      ? `Work is in progress with ${ticket.assignedTechnicianName}.`
+      : "Work is now in progress.";
+  }
+
+  if (ticket.status === "RESOLVED") {
+    return "The issue has been resolved and is awaiting final closure.";
+  }
+
+  if (ticket.status === "CLOSED") {
+    return "This incident has been fully completed.";
+  }
+
+  return ticket.rejectionReason || "This incident was rejected.";
+}
+
+function studentStatTone(tone) {
+  if (tone === "amber") return "border-amber-100 bg-amber-50 text-amber-800";
+  if (tone === "sky") return "border-sky-100 bg-sky-50 text-sky-800";
+  if (tone === "emerald") return "border-emerald-100 bg-emerald-50 text-emerald-800";
+  return "border-blue-100 bg-white text-campus-navy";
+}
+
 function formatDateTime(value) {
   if (!value) return "-";
 
@@ -1177,6 +1376,103 @@ function toDataUrl(file) {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+}
+
+function printTicket(ticket) {
+  if (typeof window === "undefined") return;
+
+  const printWindow = window.open("", "_blank", "width=900,height=700");
+  if (!printWindow) return;
+
+  const attachments = (ticket.imageAttachments || [])
+    .map((image, index) => `
+      <div style="margin-top:16px;">
+        <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#475569;">Attachment ${index + 1}</p>
+        <img src="${image}" alt="Ticket attachment ${index + 1}" style="width:100%;max-height:280px;object-fit:cover;border:1px solid #dbeafe;border-radius:12px;" />
+      </div>
+    `)
+    .join("");
+
+  const notes = [
+    ticket.resolutionNotes
+      ? `<div style="margin-top:16px;padding:16px;border-radius:14px;background:#ecfdf5;border:1px solid #a7f3d0;"><p style="margin:0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:#047857;">Resolution Notes</p><p style="margin:8px 0 0;color:#065f46;line-height:1.7;">${escapeHtml(ticket.resolutionNotes)}</p></div>`
+      : "",
+    ticket.rejectionReason
+      ? `<div style="margin-top:16px;padding:16px;border-radius:14px;background:#fef2f2;border:1px solid #fecaca;"><p style="margin:0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:#b91c1c;">Rejection Reason</p><p style="margin:8px 0 0;color:#7f1d1d;line-height:1.7;">${escapeHtml(ticket.rejectionReason)}</p></div>`
+      : "",
+  ].join("");
+
+  const location = [
+    ticket.resourceLocation,
+    ticket.resourceBuilding,
+    ticket.resourceFloor,
+    ticket.resourceRoomNumber,
+  ].filter(Boolean).join(" | ");
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Incident Ticket ${escapeHtml(ticket.id)}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 32px; color: #0f172a; }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 24px; }
+          .badge { display: inline-block; margin-right: 8px; padding: 6px 10px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; }
+          .panel { border: 1px solid #e2e8f0; border-radius: 18px; padding: 18px; margin-top: 18px; }
+          .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; }
+          .label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: #64748b; }
+          .value { margin-top: 4px; font-size: 14px; font-weight: 600; color: #0f172a; }
+          .description { white-space: pre-wrap; line-height: 1.7; color: #334155; }
+          @media print { body { margin: 18px; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <p style="margin:0;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.16em;color:#2563eb;">Smart Campus Incident Ticket</p>
+            <h1 style="margin:12px 0 0;font-size:30px;">${escapeHtml(ticket.resourceName || "Campus Resource")}</h1>
+            <p style="margin:10px 0 0;font-size:14px;color:#475569;">Printed on ${escapeHtml(formatDateTime(new Date().toISOString()))}</p>
+          </div>
+          <div>
+            <span class="badge">${escapeHtml(formatLabel(ticket.status))}</span>
+            <span class="badge">${escapeHtml(formatLabel(ticket.priority))}</span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="grid">
+            <div><div class="label">Ticket ID</div><div class="value">${escapeHtml(ticket.id)}</div></div>
+            <div><div class="label">Category</div><div class="value">${escapeHtml(ticket.category)}</div></div>
+            <div><div class="label">Reported By</div><div class="value">${escapeHtml(ticket.createdByUserName)}</div></div>
+            <div><div class="label">Contact</div><div class="value">${escapeHtml(ticket.preferredContactDetails)}</div></div>
+            <div><div class="label">Assigned Technician</div><div class="value">${escapeHtml(ticket.assignedTechnicianName || "Not assigned")}</div></div>
+            <div><div class="label">Created</div><div class="value">${escapeHtml(formatDateTime(ticket.createdAt))}</div></div>
+            <div><div class="label">Location</div><div class="value">${escapeHtml(location)}</div></div>
+            <div><div class="label">Progress</div><div class="value">${escapeHtml(getStudentProgressMessage(ticket))}</div></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="label">Issue Description</div>
+          <p class="description">${escapeHtml(ticket.description)}</p>
+        </div>
+        ${notes}
+        ${attachments ? `<div class="panel"><div class="label">Attachments</div>${attachments}</div>` : ""}
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 export default IncidentTicketsPage;
