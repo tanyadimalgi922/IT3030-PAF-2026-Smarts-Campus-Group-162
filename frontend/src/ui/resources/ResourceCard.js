@@ -1,7 +1,9 @@
+import { useState } from "react";
 import StudentBookingPanel from "../bookings/StudentBookingPanel";
 
 function ResourceCard({ adminMode = false, bookingMode = false, onBooked, onDelete, onEdit, resource, user }) {
   const amenities = resource.amenities || [];
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   return (
     <article className="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow">
@@ -110,7 +112,25 @@ function ResourceCard({ adminMode = false, bookingMode = false, onBooked, onDele
         )}
 
         {bookingMode && resource.status === "ACTIVE" && (
-          <StudentBookingPanel onBooked={onBooked} resource={resource} user={user} />
+          <>
+            <button
+              className="primary-action mt-4 min-h-11 w-full rounded-md px-4 text-sm font-black text-white transition hover:scale-[1.01]"
+              onClick={() => setBookingOpen((current) => !current)}
+              type="button"
+            >
+              {bookingOpen ? "Hide Booking" : "Book Now"}
+            </button>
+            {bookingOpen && (
+              <StudentBookingPanel
+                onBooked={() => {
+                  onBooked?.();
+                  setBookingOpen(false);
+                }}
+                resource={resource}
+                user={user}
+              />
+            )}
+          </>
         )}
       </div>
     </article>

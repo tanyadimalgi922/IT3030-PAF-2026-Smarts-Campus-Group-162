@@ -1,9 +1,13 @@
 package Backend.booking;
 
 public record BookingSlotResponse(
+        String date,
         String startTime,
         String endTime,
         String state,
-        String bookingId
+        int leftCount,
+        int pendingCount,
+        int bookedCount,
+        boolean availableForRequest
 ) {
 }

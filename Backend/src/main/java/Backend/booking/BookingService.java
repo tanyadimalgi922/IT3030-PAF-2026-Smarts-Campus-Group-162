@@ -20,6 +20,7 @@ import java.util.Objects;
 @Service
 public class BookingService {
 
+    private static final int SLOT_MINUTES = 120;
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     private final ResourceBookingRepository bookingRepository;
@@ -40,7 +41,8 @@ public class BookingService {
         validateTimeRange(startTime, endTime);
         validateCapacity(resource, request.expectedAttendees());
         validateInsideAvailability(resource, date, startTime, endTime);
-        validateNoConflict(resource.getId(), date, startTime, endTime, null);
+        validateGeneratedSlot(resource, date, startTime, endTime);
+        validateSlotAvailability(resource, date, startTime, endTime, request.expectedAttendees(), null);
 
         ResourceBooking booking = new ResourceBooking();
         booking.setResourceId(resource.getId());
@@ -78,7 +80,7 @@ public class BookingService {
 
         return resource.getAvailabilityWindows().stream()
                 .filter(window -> windowContainsDate(window, date))
-                .flatMap(window -> buildWindowSlots(resource.getId(), date, window).stream())
+                .flatMap(window -> buildWindowSlots(resource, date, window).stream())
                 .sorted(Comparator.comparing(BookingSlotResponse::startTime))
                 .toList();
     }
@@ -89,11 +91,12 @@ public class BookingService {
             throw new IllegalArgumentException("Only pending bookings can be approved.");
         }
 
-        validateNoConflict(
-                booking.getResourceId(),
+        validateSlotAvailability(
+                getResource(booking.getResourceId()),
                 parseDate(booking.getDate(), "Booking date is invalid."),
                 parseTime(booking.getStartTime(), "Start time is invalid."),
                 parseTime(booking.getEndTime(), "End time is invalid."),
+                booking.getExpectedAttendees(),
                 booking.getId()
         );
 
@@ -140,41 +143,42 @@ public class BookingService {
                 .orElseThrow(() -> new IllegalArgumentException("Resource not found."));
     }
 
-    private List<BookingSlotResponse> buildWindowSlots(String resourceId, LocalDate date, AvailabilityWindow window) {
+    private List<BookingSlotResponse> buildWindowSlots(CampusResource resource, LocalDate date, AvailabilityWindow window) {
         LocalTime start = parseTime(window.getStartTime(), "Availability start time is invalid.");
         LocalTime end = parseTime(window.getEndTime(), "Availability end time is invalid.");
         List<BookingSlotResponse> slots = new ArrayList<>();
 
         LocalTime cursor = start;
-        while (cursor.plusMinutes(30).compareTo(end) <= 0) {
-            LocalTime slotEnd = cursor.plusMinutes(30);
-            slots.add(buildSlot(resourceId, date, cursor, slotEnd));
+        while (cursor.isBefore(end)) {
+            LocalTime slotEnd = cursor.plusMinutes(SLOT_MINUTES);
+            if (slotEnd.isAfter(end)) {
+                slotEnd = end;
+            }
+
+            slots.add(buildSlot(resource, date, cursor, slotEnd));
             cursor = slotEnd;
         }
 
         return slots;
     }
 
-    private BookingSlotResponse buildSlot(String resourceId, LocalDate date, LocalTime start, LocalTime end) {
-        ResourceBooking blockingBooking = bookingRepository.findAll().stream()
-                .filter(booking -> resourceId.equals(booking.getResourceId()))
-                .filter(booking -> date.toString().equals(booking.getDate()))
-                .filter(booking -> booking.getStatus() == BookingStatus.PENDING || booking.getStatus() == BookingStatus.APPROVED)
-                .filter(booking -> overlaps(
-                        start,
-                        end,
-                        parseTime(booking.getStartTime(), "Booking start time is invalid."),
-                        parseTime(booking.getEndTime(), "Booking end time is invalid.")
-                ))
-                .findFirst()
-                .orElse(null);
+    private BookingSlotResponse buildSlot(CampusResource resource, LocalDate date, LocalTime start, LocalTime end) {
+        List<ResourceBooking> matchingBookings = findMatchingSlotBookings(resource.getId(), date, start, end, null);
+        int pendingCount = sumAttendeesByStatus(matchingBookings, BookingStatus.PENDING);
+        int bookedCount = sumAttendeesByStatus(matchingBookings, BookingStatus.APPROVED);
+        int leftCount = Math.max(resource.getCapacity() - pendingCount - bookedCount, 0);
+        String state = leftCount > 0 ? "AVAILABLE" : "FULL";
 
-        if (blockingBooking == null) {
-            return new BookingSlotResponse(formatTime(start), formatTime(end), "AVAILABLE", null);
-        }
-
-        String state = blockingBooking.getStatus() == BookingStatus.APPROVED ? "BOOKED" : "PENDING";
-        return new BookingSlotResponse(formatTime(start), formatTime(end), state, blockingBooking.getId());
+        return new BookingSlotResponse(
+                date.toString(),
+                formatTime(start),
+                formatTime(end),
+                state,
+                leftCount,
+                pendingCount,
+                bookedCount,
+                leftCount > 0
+        );
     }
 
     private void validateBookableResource(CampusResource resource) {
@@ -213,22 +217,80 @@ public class BookingService {
         }
     }
 
-    private void validateNoConflict(String resourceId, LocalDate date, LocalTime startTime, LocalTime endTime, String currentBookingId) {
-        boolean conflict = bookingRepository.findAll().stream()
+    private void validateGeneratedSlot(CampusResource resource, LocalDate date, LocalTime startTime, LocalTime endTime) {
+        boolean matchesSlot = resource.getAvailabilityWindows().stream()
+                .filter(window -> windowContainsDate(window, date))
+                .anyMatch(window -> matchesGeneratedWindowSlot(window, startTime, endTime));
+
+        if (!matchesSlot) {
+            throw new IllegalArgumentException("Please select one of the generated two-hour slots.");
+        }
+    }
+
+    private boolean matchesGeneratedWindowSlot(AvailabilityWindow window, LocalTime startTime, LocalTime endTime) {
+        LocalTime cursor = parseTime(window.getStartTime(), "Availability start time is invalid.");
+        LocalTime windowEnd = parseTime(window.getEndTime(), "Availability end time is invalid.");
+
+        while (cursor.isBefore(windowEnd)) {
+            LocalTime slotEnd = cursor.plusMinutes(SLOT_MINUTES);
+            if (slotEnd.isAfter(windowEnd)) {
+                slotEnd = windowEnd;
+            }
+
+            if (cursor.equals(startTime) && slotEnd.equals(endTime)) {
+                return true;
+            }
+
+            cursor = slotEnd;
+        }
+
+        return false;
+    }
+
+    private void validateSlotAvailability(
+            CampusResource resource,
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime,
+            int expectedAttendees,
+            String currentBookingId
+    ) {
+        List<ResourceBooking> matchingBookings = findMatchingSlotBookings(resource.getId(), date, startTime, endTime, currentBookingId);
+        int pendingCount = sumAttendeesByStatus(matchingBookings, BookingStatus.PENDING);
+        int bookedCount = sumAttendeesByStatus(matchingBookings, BookingStatus.APPROVED);
+        int leftCount = resource.getCapacity() - pendingCount - bookedCount;
+
+        if (expectedAttendees > leftCount) {
+            throw new BookingConflictException("Selected slot does not have enough capacity left.");
+        }
+    }
+
+    private List<ResourceBooking> findMatchingSlotBookings(
+            String resourceId,
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime,
+            String currentBookingId
+    ) {
+        return bookingRepository.findAll().stream()
                 .filter(booking -> !Objects.equals(booking.getId(), currentBookingId))
                 .filter(booking -> resourceId.equals(booking.getResourceId()))
                 .filter(booking -> date.toString().equals(booking.getDate()))
                 .filter(booking -> booking.getStatus() == BookingStatus.PENDING || booking.getStatus() == BookingStatus.APPROVED)
-                .anyMatch(booking -> overlaps(
+                .filter(booking -> overlaps(
                         startTime,
                         endTime,
                         parseTime(booking.getStartTime(), "Booking start time is invalid."),
                         parseTime(booking.getEndTime(), "Booking end time is invalid.")
-                ));
+                ))
+                .toList();
+    }
 
-        if (conflict) {
-            throw new BookingConflictException("Selected time range is already booked or pending review.");
-        }
+    private int sumAttendeesByStatus(List<ResourceBooking> bookings, BookingStatus status) {
+        return bookings.stream()
+                .filter(booking -> booking.getStatus() == status)
+                .mapToInt(ResourceBooking::getExpectedAttendees)
+                .sum();
     }
 
     private boolean windowContainsDate(AvailabilityWindow window, LocalDate date) {
