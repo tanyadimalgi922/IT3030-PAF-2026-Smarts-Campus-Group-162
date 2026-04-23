@@ -80,6 +80,7 @@ public class IncidentTicketService {
 
     public IncidentTicket assign(String id, AssignTicketRequest request) {
         IncidentTicket ticket = getById(id);
+        assertTicketNotClosed(ticket);
         UserAccount technician = userAccountRepository.findById(request.technicianId())
                 .filter(user -> user.getRole() == UserRole.TECHNICIAN)
                 .orElseThrow(() -> new IllegalArgumentException("Technician account not found."));
@@ -94,6 +95,10 @@ public class IncidentTicketService {
     public IncidentTicket updateStatus(String id, UpdateTicketStatusRequest request) {
         IncidentTicket ticket = getById(id);
 
+        if (ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new IllegalArgumentException("Closed tickets cannot be changed.");
+        }
+
         if (request.actorRole() == UserRole.TECHNICIAN) {
             if (!request.actorId().equals(ticket.getAssignedTechnicianId())) {
                 throw new IllegalArgumentException("Only the assigned technician can update this ticket.");
@@ -107,8 +112,8 @@ public class IncidentTicketService {
             throw new IllegalArgumentException("Only admins can reject tickets.");
         }
 
-        if (request.status() == TicketStatus.CLOSED && request.actorRole() == UserRole.STUDENT) {
-            throw new IllegalArgumentException("Students cannot close tickets.");
+        if (request.status() == TicketStatus.CLOSED && request.actorRole() != UserRole.ADMIN) {
+            throw new IllegalArgumentException("Only admins can close tickets.");
         }
 
         validateTransition(ticket.getStatus(), request.status());
@@ -144,6 +149,7 @@ public class IncidentTicketService {
 
     public IncidentTicket addComment(String id, TicketCommentRequest request) {
         IncidentTicket ticket = getById(id);
+        assertTicketNotClosed(ticket);
 
         TicketComment comment = new TicketComment();
         comment.setId(UUID.randomUUID().toString());
@@ -161,6 +167,7 @@ public class IncidentTicketService {
 
     public IncidentTicket updateComment(String ticketId, String commentId, TicketCommentRequest request) {
         IncidentTicket ticket = getById(ticketId);
+        assertTicketNotClosed(ticket);
         TicketComment comment = findComment(ticket, commentId);
 
         if (!canManageComment(comment, request.authorId(), request.authorRole())) {
@@ -175,6 +182,7 @@ public class IncidentTicketService {
 
     public void deleteComment(String ticketId, String commentId, String actorId, UserRole actorRole) {
         IncidentTicket ticket = getById(ticketId);
+        assertTicketNotClosed(ticket);
         TicketComment comment = findComment(ticket, commentId);
 
         if (!canManageComment(comment, actorId, actorRole)) {
@@ -195,6 +203,12 @@ public class IncidentTicketService {
     private IncidentTicket getById(String id) {
         return incidentTicketRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Incident ticket not found."));
+    }
+
+    private void assertTicketNotClosed(IncidentTicket ticket) {
+        if (ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new IllegalArgumentException("Closed tickets are locked and cannot be changed.");
+        }
     }
 
     private void validateAttachments(List<String> imageAttachments) {

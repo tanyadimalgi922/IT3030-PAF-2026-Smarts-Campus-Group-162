@@ -341,6 +341,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
   const selectedTicket = (mode === "technician" || mode === "admin")
     ? tickets.find((ticket) => ticket.id === selectedTicketId) || null
     : null;
+  const selectedTicketLocked = isLockedTicket(selectedTicket);
   const pageTitle = mode === "student"
     ? "Report incidents for campus resources."
     : mode === "admin"
@@ -666,7 +667,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
                             </select>
                             <button
                               className="primary-action min-h-12 rounded-2xl px-5 text-sm font-black text-white disabled:opacity-60"
-                              disabled={!assignments[selectedTicket.id] || ticketActionId === selectedTicket.id}
+                              disabled={selectedTicketLocked || !assignments[selectedTicket.id] || ticketActionId === selectedTicket.id}
                               onClick={() => handleAssign(selectedTicket.id)}
                               type="button"
                             >
@@ -676,7 +677,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
                         </section>
 
                         <StatusEditor
-                          disabled={ticketActionId === selectedTicket.id}
+                          disabled={selectedTicketLocked || ticketActionId === selectedTicket.id}
                           form={statusForms[selectedTicket.id] || { status: "", resolutionNotes: "", rejectionReason: "" }}
                           onChange={(field, value) =>
                             setStatusForms((current) => ({
@@ -691,7 +692,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
                     ) : (
                       <div className="mt-5">
                         <StatusEditor
-                          disabled={ticketActionId === selectedTicket.id}
+                          disabled={selectedTicketLocked || ticketActionId === selectedTicket.id}
                           form={statusForms[selectedTicket.id] || { status: "", resolutionNotes: "", rejectionReason: "" }}
                           mode="technician"
                           onChange={(field, value) =>
@@ -717,6 +718,7 @@ function IncidentTicketsPage({ mode, onBack, preselectedResourceId = "", user })
                       setCommentInputMap={setCommentInputMap}
                       setDraftComment={setDraftComment}
                       setEditingCommentId={setEditingCommentId}
+                      ticketLocked={selectedTicketLocked}
                       ticket={selectedTicket}
                       ticketActionId={ticketActionId}
                       user={user}
@@ -902,6 +904,7 @@ function TicketCommentsSection({
   setCommentInputMap,
   setDraftComment,
   setEditingCommentId,
+  ticketLocked = false,
   ticket,
   ticketActionId,
   user,
@@ -911,14 +914,14 @@ function TicketCommentsSection({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Comments</p>
         <span className="text-xs font-bold text-slate-500">
-          Owners can edit or delete their own comments
+          {ticketLocked ? "Closed tickets are locked." : "Owners can edit or delete their own comments"}
         </span>
       </div>
 
       <div className="mt-3 grid gap-3">
         {ticket.comments?.length > 0 ? (
           ticket.comments.map((comment) => {
-            const canManage = comment.authorId === user.id || user.role === "ADMIN";
+            const canManage = !ticketLocked && (comment.authorId === user.id || user.role === "ADMIN");
             const isEditing = editingCommentId === comment.id;
 
             return (
@@ -963,6 +966,7 @@ function TicketCommentsSection({
                   <div className="mt-3">
                     <textarea
                       className="field-input min-h-24"
+                      disabled={ticketLocked}
                       onChange={(event) => {
                         setDraftComment(event.target.value);
                         setCommentEditMap((current) => ({ ...current, [comment.id]: event.target.value }));
@@ -1005,13 +1009,14 @@ function TicketCommentsSection({
       <div className="mt-4">
         <textarea
           className="field-input min-h-24"
+          disabled={ticketLocked}
           onChange={(event) => setCommentInputMap((current) => ({ ...current, [ticket.id]: event.target.value }))}
-          placeholder="Add a comment to this ticket"
+          placeholder={ticketLocked ? "Closed tickets cannot be changed" : "Add a comment to this ticket"}
           value={commentInputMap[ticket.id] || ""}
         />
         <button
           className="primary-action mt-3 min-h-10 rounded-2xl px-4 text-xs font-black text-white disabled:opacity-60"
-          disabled={ticketActionId === ticket.id || !(commentInputMap[ticket.id] || "").trim()}
+          disabled={ticketLocked || ticketActionId === ticket.id || !(commentInputMap[ticket.id] || "").trim()}
           onClick={() => handleCommentSubmit(ticket.id)}
           type="button"
         >
@@ -1026,6 +1031,7 @@ function StatusEditor({ disabled, form, mode = "admin", onChange, onSubmit, tick
   const options = mode === "technician"
     ? getTechnicianStatusOptions(ticket.status)
     : getAdminStatusOptions(ticket.status);
+  const locked = isLockedTicket(ticket);
 
   return (
     <section className="rounded-2xl border border-blue-100 bg-[#f8fbff] p-4">
@@ -1033,10 +1039,11 @@ function StatusEditor({ disabled, form, mode = "admin", onChange, onSubmit, tick
       <div className="mt-3 grid gap-3">
         <select
           className="field-input"
+          disabled={locked}
           onChange={(event) => onChange("status", event.target.value)}
           value={form.status || ""}
         >
-          <option value="">Select next status</option>
+          <option value="">{locked ? "Closed ticket" : "Select next status"}</option>
           {options.map((status) => (
             <option key={status} value={status}>
               {formatLabel(status)}
@@ -1046,23 +1053,31 @@ function StatusEditor({ disabled, form, mode = "admin", onChange, onSubmit, tick
 
         <textarea
           className="field-input min-h-24"
+          disabled={locked}
           onChange={(event) => onChange("resolutionNotes", event.target.value)}
-          placeholder="Resolution notes"
+          placeholder={locked ? "Closed tickets are locked" : "Resolution notes"}
           value={form.resolutionNotes || ""}
         />
 
         {mode !== "technician" && (
           <textarea
             className="field-input min-h-20"
+            disabled={locked}
             onChange={(event) => onChange("rejectionReason", event.target.value)}
-            placeholder="Rejection reason"
+            placeholder={locked ? "Closed tickets are locked" : "Rejection reason"}
             value={form.rejectionReason || ""}
           />
         )}
 
+        {locked && (
+          <p className="text-xs font-bold text-slate-500">
+            Closed tickets cannot be updated. Only admins can move a resolved ticket to closed.
+          </p>
+        )}
+
         <button
           className="primary-action min-h-12 rounded-2xl px-5 text-sm font-black text-white disabled:opacity-60"
-          disabled={disabled || !form.status}
+          disabled={locked || disabled || !form.status}
           onClick={onSubmit}
           type="button"
         >
@@ -1137,6 +1152,10 @@ function commentRoleCardTone(role) {
   if (role === "TECHNICIAN") return "border-sky-100 bg-sky-50/60";
   if (role === "STUDENT") return "border-emerald-100 bg-emerald-50/60";
   return "border-slate-100 bg-white";
+}
+
+function isLockedTicket(ticket) {
+  return ticket?.status === "CLOSED";
 }
 
 function formatDateTime(value) {
