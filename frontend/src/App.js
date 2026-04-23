@@ -9,6 +9,7 @@ const routes = {
   technicianRegister: "/register/technician",
   studentDashboard: "/student/dashboard",
   studentResources: "/student/resources",
+  studentBookings: "/student/bookings",
   technicianDashboard: "/technician/dashboard",
   adminDashboard: "/admin/dashboard",
   adminBookings: "/admin/bookings",
@@ -102,6 +103,7 @@ function isDashboardPath(path) {
   return [
     routes.studentDashboard,
     routes.studentResources,
+    routes.studentBookings,
     routes.technicianDashboard,
     routes.adminDashboard,
     routes.adminBookings,
