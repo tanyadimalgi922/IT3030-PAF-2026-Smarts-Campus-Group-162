@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -42,6 +43,12 @@ public class CampusResource {
 
     private String imageDataUrl;
     private Instant createdAt = Instant.now();
+    @Transient
+    private double averageRating;
+    @Transient
+    private int reviewCount;
+    @Transient
+    private List<ResourceReviewView> recentReviews = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -145,5 +152,29 @@ public class CampusResource {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(double averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public int getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
+    }
+
+    public List<ResourceReviewView> getRecentReviews() {
+        return recentReviews;
+    }
+
+    public void setRecentReviews(List<ResourceReviewView> recentReviews) {
+        this.recentReviews = recentReviews;
     }
 }

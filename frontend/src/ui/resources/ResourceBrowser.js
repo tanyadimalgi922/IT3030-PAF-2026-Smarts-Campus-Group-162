@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { deleteResource, getResources } from "../../api/resourceApi";
+import { getBookings } from "../../api/bookingApi";
+import { deleteResource, getResourceReviews, getResources } from "../../api/resourceApi";
 import ResourceCard from "./ResourceCard";
 
 const resourceTypes = [
@@ -26,6 +27,9 @@ function ResourceBrowser({ adminMode = false, bookingMode = false, onBooked, onE
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [localRefreshKey, setLocalRefreshKey] = useState(0);
+  const [approvedBookingMap, setApprovedBookingMap] = useState({});
+  const [reviewedBookingIds, setReviewedBookingIds] = useState({});
+  const [reviewedResourceIds, setReviewedResourceIds] = useState({});
 
   useEffect(() => {
     let active = true;
@@ -36,8 +40,37 @@ function ResourceBrowser({ adminMode = false, bookingMode = false, onBooked, onE
 
       try {
         const data = await getResources(filters);
+        let approvedBookings = [];
+        let userReviews = [];
+
+        if (bookingMode && user?.id) {
+          [approvedBookings, userReviews] = await Promise.all([
+            getBookings({ userId: user.id, status: "APPROVED" }),
+            getResourceReviews({ userId: user.id }),
+          ]);
+        }
+
         if (active) {
           setResources(data);
+          const reviewedIds = userReviews.reduce((accumulator, review) => {
+            accumulator[review.bookingId] = true;
+            return accumulator;
+          }, {});
+          const reviewedResources = userReviews.reduce((accumulator, review) => {
+            accumulator[review.resourceId] = true;
+            return accumulator;
+          }, {});
+
+          setApprovedBookingMap(
+            approvedBookings.reduce((accumulator, booking) => {
+              if (!reviewedIds[booking.id] && !accumulator[booking.resourceId]) {
+                accumulator[booking.resourceId] = booking;
+              }
+              return accumulator;
+            }, {})
+          );
+          setReviewedBookingIds(reviewedIds);
+          setReviewedResourceIds(reviewedResources);
         }
       } catch (requestError) {
         if (active) {
@@ -54,7 +87,7 @@ function ResourceBrowser({ adminMode = false, bookingMode = false, onBooked, onE
     return () => {
       active = false;
     };
-  }, [filters, refreshKey, localRefreshKey]);
+  }, [bookingMode, filters, refreshKey, localRefreshKey, user?.id]);
 
   const updateFilter = (field, value) => {
     setFilters((current) => ({ ...current, [field]: value }));
@@ -161,9 +194,12 @@ function ResourceBrowser({ adminMode = false, bookingMode = false, onBooked, onE
                 setLocalRefreshKey((current) => current + 1);
                 onBooked?.();
               }}
+              onReviewSubmitted={() => setLocalRefreshKey((current) => current + 1)}
               onDelete={() => handleDelete(resource)}
               onEdit={() => onEdit?.(resource.id)}
+              reviewEligibleBooking={approvedBookingMap[resource.id]}
               resource={resource}
+              userHasReviewed={Boolean(reviewedResourceIds[resource.id])}
               user={user}
             />
           ))

@@ -25,9 +25,11 @@ import java.util.stream.Collectors;
 public class ResourceController {
 
     private final ResourceService resourceService;
+    private final ResourceReviewService resourceReviewService;
 
-    public ResourceController(ResourceService resourceService) {
+    public ResourceController(ResourceService resourceService, ResourceReviewService resourceReviewService) {
         this.resourceService = resourceService;
+        this.resourceReviewService = resourceReviewService;
     }
 
     @PostMapping
@@ -51,6 +53,20 @@ public class ResourceController {
     @GetMapping("/{id}")
     public CampusResource getResource(@PathVariable String id) {
         return resourceService.getById(id);
+    }
+
+    @GetMapping("/reviews")
+    public List<ResourceReviewView> getReviews(
+            @RequestParam(required = false) String resourceId,
+            @RequestParam(required = false) String userId
+    ) {
+        return resourceReviewService.findReviews(resourceId, userId);
+    }
+
+    @PostMapping("/{id}/reviews")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResourceReviewView createReview(@PathVariable String id, @Valid @RequestBody ResourceReviewRequest request) {
+        return resourceReviewService.createReview(id, request);
     }
 
     @PutMapping("/{id}")
