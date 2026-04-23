@@ -1,4 +1,6 @@
-function ResourceCard({ resource }) {
+function ResourceCard({ adminMode = false, onDelete, onEdit, resource }) {
+  const amenities = resource.amenities || [];
+
   return (
     <article className="overflow-hidden rounded-lg border border-blue-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-glow">
       <div className="aspect-[16/9] bg-campus-cloud">
@@ -39,6 +41,34 @@ function ResourceCard({ resource }) {
           <p>
             <span className="font-bold text-campus-navy">Location:</span> {resource.location}
           </p>
+          <p>
+            <span className="font-bold text-campus-navy">Building:</span>{" "}
+            {resource.building || "Not mapped"}
+          </p>
+          <p>
+            <span className="font-bold text-campus-navy">Floor / Room:</span>{" "}
+            {[resource.floor, resource.roomNumber].filter(Boolean).join(" / ") || "Not mapped"}
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">
+            Amenities
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {amenities.length > 0 ? (
+              amenities.map((amenity) => (
+                <span
+                  className="rounded-full border border-blue-100 bg-[#f8fbff] px-3 py-1 text-xs font-bold text-campus-blue"
+                  key={amenity}
+                >
+                  {amenity}
+                </span>
+              ))
+            ) : (
+              <span className="text-sm font-semibold text-slate-500">No amenities listed</span>
+            )}
+          </div>
         </div>
 
         <div className="mt-4 rounded-md bg-campus-pale p-3">
@@ -57,6 +87,25 @@ function ResourceCard({ resource }) {
             )}
           </div>
         </div>
+
+        {adminMode && (
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <button
+              className="min-h-11 rounded-md bg-campus-navy px-4 text-sm font-black text-white transition hover:bg-campus-blue"
+              onClick={onEdit}
+              type="button"
+            >
+              Update
+            </button>
+            <button
+              className="min-h-11 rounded-md border border-red-200 bg-red-50 px-4 text-sm font-black text-red-700 transition hover:bg-red-100"
+              onClick={onDelete}
+              type="button"
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </div>
     </article>
   );

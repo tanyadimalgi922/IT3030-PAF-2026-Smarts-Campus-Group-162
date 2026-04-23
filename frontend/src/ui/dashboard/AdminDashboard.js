@@ -5,11 +5,14 @@ import AdminResourceManager from "../resources/AdminResourceManager";
 import ResourceCreatePage from "../resources/ResourceCreatePage";
 
 function AdminDashboard({ user, onLogout, onNavigate, path }) {
-  if (path === "/admin/resources/create") {
+  const editMatch = path.match(/^\/admin\/resources\/edit\/(.+)$/);
+
+  if (path === "/admin/resources/create" || editMatch) {
     return (
       <ResourceCreatePage
         onBack={() => onNavigate("/admin/dashboard")}
         onLogout={onLogout}
+        resourceId={editMatch?.[1]}
         user={user}
       />
     );
@@ -97,7 +100,10 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
         </div>
 
         <ResourceTypeChart />
-        <AdminResourceManager onCreate={() => onNavigate("/admin/resources/create")} />
+        <AdminResourceManager
+          onCreate={() => onNavigate("/admin/resources/create")}
+          onEdit={(resourceId) => onNavigate(`/admin/resources/edit/${resourceId}`)}
+        />
       </section>
     </main>
   );

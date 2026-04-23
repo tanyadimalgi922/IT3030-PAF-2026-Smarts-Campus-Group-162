@@ -1,22 +1,77 @@
-import { useState } from "react";
-import { createResource } from "../../api/resourceApi";
+import { useEffect, useState } from "react";
+import { createResource, getResource, updateResource } from "../../api/resourceApi";
 import CampusHeader from "../CampusHeader";
 import Field from "../Field";
+
+const amenities = ["Wi-Fi", "Air conditioning", "Smart board", "Whiteboard", "Sound system"];
+const buildings = ["Main Academic Block", "Science Complex", "Engineering Block", "Library Building", "Sports Center"];
+const floors = ["Ground Floor", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"];
 
 const initialForm = {
   name: "",
   type: "LECTURE_HALL",
   capacity: "",
   location: "",
+  building: "Main Academic Block",
+  floor: "Ground Floor",
+  roomNumber: "",
+  amenities: [],
   status: "ACTIVE",
   imageDataUrl: "",
   availabilityWindows: [{ startDate: "", endDate: "", startTime: "", endTime: "" }],
 };
 
-function ResourceCreatePage({ onBack, onLogout, user }) {
+function ResourceCreatePage({ onBack, onLogout, resourceId, user }) {
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState({ tone: "idle", message: "" });
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(Boolean(resourceId));
+  const isEditMode = Boolean(resourceId);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadResource() {
+      if (!resourceId) {
+        setForm(initialForm);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setStatus({ tone: "idle", message: "" });
+
+      try {
+        const resource = await getResource(resourceId);
+        if (active) {
+          setForm({
+            ...initialForm,
+            ...resource,
+            capacity: resource.capacity ? String(resource.capacity) : "",
+            amenities: resource.amenities || [],
+            availabilityWindows:
+              (resource.availabilityWindows || []).length > 0
+                ? resource.availabilityWindows
+                : initialForm.availabilityWindows,
+          });
+        }
+      } catch (error) {
+        if (active) {
+          setStatus({ tone: "error", message: error.message });
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadResource();
+
+    return () => {
+      active = false;
+    };
+  }, [resourceId]);
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -59,21 +114,37 @@ function ResourceCreatePage({ onBack, onLogout, user }) {
     reader.readAsDataURL(file);
   };
 
+  const toggleAmenity = (amenity) => {
+    setForm((current) => ({
+      ...current,
+      amenities: current.amenities.includes(amenity)
+        ? current.amenities.filter((item) => item !== amenity)
+        : [...current.amenities, amenity],
+    }));
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSaving(true);
     setStatus({ tone: "idle", message: "" });
 
     try {
-      await createResource({
+      const payload = {
         ...form,
         capacity: Number(form.capacity),
         availabilityWindows: form.availabilityWindows.filter(
           (window) => window.startDate && window.endDate && window.startTime && window.endTime
         ),
-      });
-      setForm(initialForm);
-      setStatus({ tone: "success", message: "Resource created successfully." });
+      };
+
+      if (isEditMode) {
+        await updateResource(resourceId, payload);
+        setStatus({ tone: "success", message: "Resource updated successfully." });
+      } else {
+        await createResource(payload);
+        setForm(initialForm);
+        setStatus({ tone: "success", message: "Resource created successfully." });
+      }
     } catch (error) {
       setStatus({ tone: "error", message: error.message });
     } finally {
@@ -89,14 +160,14 @@ function ResourceCreatePage({ onBack, onLogout, user }) {
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.32em] text-sky-200">
-                Create Resource
+                {isEditMode ? "Update Resource" : "Create Resource"}
               </p>
               <h1 className="mt-4 text-4xl font-black sm:text-5xl">
-                Add a new bookable resource
+                {isEditMode ? "Update resource details" : "Add a new bookable resource"}
               </h1>
               <p className="mt-4 max-w-3xl text-base leading-7 text-white/80">
-                Add a facility or asset with its image, capacity, location, availability date
-                range, active hours, and operational status.
+                Manage resource image, capacity, building map details, amenities, availability
+                date range, active hours, and operational status.
               </p>
             </div>
             <button
@@ -109,6 +180,11 @@ function ResourceCreatePage({ onBack, onLogout, user }) {
           </div>
         </div>
 
+      {loading ? (
+        <div className="mt-6 rounded-lg border border-blue-100 bg-white p-5 text-sm font-black text-campus-blue">
+          Loading resource details...
+        </div>
+      ) : (
       <form className="mt-6 grid gap-5" onSubmit={handleSubmit}>
         <div className="glass-panel rounded-lg p-5">
           <p className="text-sm font-bold uppercase tracking-[0.14em] text-campus-violet">
@@ -144,8 +220,42 @@ function ResourceCreatePage({ onBack, onLogout, user }) {
             <Field
               label="Location"
               onChange={(value) => updateField("location", value)}
-              placeholder="Block A, Floor 2"
+              placeholder="Near main stairway"
               value={form.location}
+            />
+            <label>
+              <span className="field-label">Building</span>
+              <select
+                className="field-input"
+                onChange={(event) => updateField("building", event.target.value)}
+                value={form.building}
+              >
+                {buildings.map((building) => (
+                  <option key={building} value={building}>
+                    {building}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span className="field-label">Floor</span>
+              <select
+                className="field-input"
+                onChange={(event) => updateField("floor", event.target.value)}
+                value={form.floor}
+              >
+                {floors.map((floor) => (
+                  <option key={floor} value={floor}>
+                    {floor}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Field
+              label="Room number"
+              onChange={(value) => updateField("roomNumber", value)}
+              placeholder="A-204"
+              value={form.roomNumber}
             />
             <label>
               <span className="field-label">Status</span>
@@ -176,6 +286,34 @@ function ResourceCreatePage({ onBack, onLogout, user }) {
               src={form.imageDataUrl}
             />
           )}
+        </div>
+
+        <div className="glass-panel rounded-lg p-5">
+          <p className="text-sm font-bold uppercase tracking-[0.14em] text-campus-violet">
+            Amenities / Features
+          </p>
+          <h3 className="mt-1 text-xl font-black text-campus-navy">
+            Select available facilities
+          </h3>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {amenities.map((amenity) => {
+              const selected = form.amenities.includes(amenity);
+              return (
+                <button
+                  className={`min-h-12 rounded-lg border px-4 text-sm font-black transition ${
+                    selected
+                      ? "border-campus-blue bg-campus-blue text-white shadow-glow"
+                      : "border-blue-100 bg-white text-campus-navy hover:bg-campus-cloud"
+                  }`}
+                  key={amenity}
+                  onClick={() => toggleAmenity(amenity)}
+                  type="button"
+                >
+                  {amenity}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="glass-panel rounded-lg p-5">
@@ -259,7 +397,7 @@ function ResourceCreatePage({ onBack, onLogout, user }) {
             disabled={saving}
             type="submit"
           >
-            {saving ? "Saving..." : "Create Resource"}
+            {saving ? "Saving..." : isEditMode ? "Update Resource" : "Create Resource"}
           </button>
           <button
             className="min-h-12 rounded-md border border-blue-200 bg-white/80 px-6 text-base font-black text-campus-blue transition hover:bg-campus-cloud"
@@ -270,6 +408,7 @@ function ResourceCreatePage({ onBack, onLogout, user }) {
           </button>
         </div>
       </form>
+      )}
       </section>
     </main>
   );

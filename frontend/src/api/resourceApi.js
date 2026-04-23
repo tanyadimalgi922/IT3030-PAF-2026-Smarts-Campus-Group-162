@@ -19,6 +19,22 @@ export function createResource(payload) {
   });
 }
 
+export function getResource(id) {
+  return request(`/resources/${id}`);
+}
+
+export function updateResource(id, payload) {
+  return request(`/resources/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteResource(id) {
+  return request(`/resources/${id}`, { method: "DELETE" });
+}
+
 export function getResources(filters = {}) {
   const params = new URLSearchParams();
 

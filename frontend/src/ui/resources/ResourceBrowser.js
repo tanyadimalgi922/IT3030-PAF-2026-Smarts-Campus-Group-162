@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getResources } from "../../api/resourceApi";
+import { deleteResource, getResources } from "../../api/resourceApi";
 import ResourceCard from "./ResourceCard";
 
 const resourceTypes = [
@@ -10,16 +10,22 @@ const resourceTypes = [
   { value: "EQUIPMENT", label: "Equipment" },
 ];
 
-function ResourceBrowser({ refreshKey = 0 }) {
+const buildings = ["", "Main Academic Block", "Science Complex", "Engineering Block", "Library Building", "Sports Center"];
+const floors = ["", "Ground Floor", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"];
+
+function ResourceBrowser({ adminMode = false, onEdit, refreshKey = 0 }) {
   const [filters, setFilters] = useState({
     search: "",
     type: "",
     location: "",
+    building: "",
+    floor: "",
     minCapacity: "",
   });
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [localRefreshKey, setLocalRefreshKey] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -48,10 +54,22 @@ function ResourceBrowser({ refreshKey = 0 }) {
     return () => {
       active = false;
     };
-  }, [filters, refreshKey]);
+  }, [filters, refreshKey, localRefreshKey]);
 
   const updateFilter = (field, value) => {
     setFilters((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleDelete = async (resource) => {
+    const confirmed = window.confirm(`Delete ${resource.name}?`);
+    if (!confirmed) return;
+
+    try {
+      await deleteResource(resource.id);
+      setLocalRefreshKey((current) => current + 1);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   };
 
   return (
@@ -65,7 +83,7 @@ function ResourceBrowser({ refreshKey = 0 }) {
         </div>
       </div>
 
-      <div className="glass-panel mt-4 grid gap-3 rounded-lg p-4 md:grid-cols-4">
+      <div className="glass-panel mt-4 grid gap-3 rounded-lg p-4 md:grid-cols-3 lg:grid-cols-6">
         <input
           className="field-input"
           onChange={(event) => updateFilter("search", event.target.value)}
@@ -90,6 +108,28 @@ function ResourceBrowser({ refreshKey = 0 }) {
           placeholder="Location"
           value={filters.location}
         />
+        <select
+          className="field-input"
+          onChange={(event) => updateFilter("building", event.target.value)}
+          value={filters.building}
+        >
+          {buildings.map((building) => (
+            <option key={building || "all-buildings"} value={building}>
+              {building || "All buildings"}
+            </option>
+          ))}
+        </select>
+        <select
+          className="field-input"
+          onChange={(event) => updateFilter("floor", event.target.value)}
+          value={filters.floor}
+        >
+          {floors.map((floor) => (
+            <option key={floor || "all-floors"} value={floor}>
+              {floor || "All floors"}
+            </option>
+          ))}
+        </select>
         <input
           className="field-input"
           min="1"
@@ -112,7 +152,15 @@ function ResourceBrowser({ refreshKey = 0 }) {
             Loading resources...
           </div>
         ) : resources.length > 0 ? (
-          resources.map((resource) => <ResourceCard key={resource.id} resource={resource} />)
+          resources.map((resource) => (
+            <ResourceCard
+              adminMode={adminMode}
+              key={resource.id}
+              onDelete={() => handleDelete(resource)}
+              onEdit={() => onEdit?.(resource.id)}
+              resource={resource}
+            />
+          ))
         ) : (
           <div className="rounded-lg border border-blue-100 bg-white p-5 text-sm font-bold text-slate-600">
             No resources found.

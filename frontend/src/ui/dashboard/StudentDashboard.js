@@ -1,5 +1,6 @@
 import CampusHeader from "../CampusHeader";
 import InfoCard from "./InfoCard";
+import CampusMapView from "../resources/CampusMapView";
 import ResourceBrowser from "../resources/ResourceBrowser";
 
 function StudentDashboard({ user, onLogout }) {
@@ -49,6 +50,7 @@ function StudentDashboard({ user, onLogout }) {
           <InfoCard label="Access" value="Facilities and asset bookings" />
         </div>
 
+        <CampusMapView />
         <ResourceBrowser />
       </section>
     </main>

@@ -11,6 +11,7 @@ const routes = {
   technicianDashboard: "/technician/dashboard",
   adminDashboard: "/admin/dashboard",
   adminCreateResource: "/admin/resources/create",
+  adminEditResource: "/admin/resources/edit",
 };
 
 function App() {
@@ -101,7 +102,7 @@ function isDashboardPath(path) {
     routes.technicianDashboard,
     routes.adminDashboard,
     routes.adminCreateResource,
-  ].includes(path);
+  ].includes(path) || path.startsWith(`${routes.adminEditResource}/`);
 }
 
 function getStoredUser() {

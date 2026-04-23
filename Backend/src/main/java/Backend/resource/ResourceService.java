@@ -23,11 +23,39 @@ public class ResourceService {
         return campusResourceRepository.save(resource);
     }
 
-    public List<CampusResource> findResources(String search, ResourceType type, String location, Integer minCapacity) {
+    public CampusResource getById(String id) {
+        return campusResourceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Resource not found."));
+    }
+
+    public CampusResource update(String id, CampusResource resource) {
+        CampusResource existing = getById(id);
+        resource.setId(existing.getId());
+        resource.setCreatedAt(existing.getCreatedAt() == null ? Instant.now() : existing.getCreatedAt());
+        return campusResourceRepository.save(resource);
+    }
+
+    public void delete(String id) {
+        if (!campusResourceRepository.existsById(id)) {
+            throw new IllegalArgumentException("Resource not found.");
+        }
+        campusResourceRepository.deleteById(id);
+    }
+
+    public List<CampusResource> findResources(
+            String search,
+            ResourceType type,
+            String location,
+            String building,
+            String floor,
+            Integer minCapacity
+    ) {
         return campusResourceRepository.findAll().stream()
                 .filter(resource -> matchesSearch(resource, search))
                 .filter(resource -> type == null || resource.getType() == type)
                 .filter(resource -> matchesLocation(resource, location))
+                .filter(resource -> matchesBuilding(resource, building))
+                .filter(resource -> matchesFloor(resource, floor))
                 .filter(resource -> minCapacity == null || resource.getCapacity() >= minCapacity)
                 .sorted(Comparator.comparing(
                         CampusResource::getCreatedAt,
@@ -53,6 +81,22 @@ public class ResourceService {
         }
 
         return contains(resource.getLocation(), location.toLowerCase());
+    }
+
+    private boolean matchesBuilding(CampusResource resource, String building) {
+        if (!StringUtils.hasText(building)) {
+            return true;
+        }
+
+        return contains(resource.getBuilding(), building.toLowerCase());
+    }
+
+    private boolean matchesFloor(CampusResource resource, String floor) {
+        if (!StringUtils.hasText(floor)) {
+            return true;
+        }
+
+        return contains(resource.getFloor(), floor.toLowerCase());
     }
 
     private boolean contains(String value, String search) {

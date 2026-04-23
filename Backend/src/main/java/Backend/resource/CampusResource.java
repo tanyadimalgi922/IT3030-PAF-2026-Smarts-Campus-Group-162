@@ -29,6 +29,11 @@ public class CampusResource {
     @NotBlank
     private String location;
 
+    private String building;
+    private String floor;
+    private String roomNumber;
+    private List<String> amenities = new ArrayList<>();
+
     @NotNull
     private ResourceStatus status;
 
@@ -76,6 +81,38 @@ public class CampusResource {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getBuilding() {
+        return building;
+    }
+
+    public void setBuilding(String building) {
+        this.building = building;
+    }
+
+    public String getFloor() {
+        return floor;
+    }
+
+    public void setFloor(String floor) {
+        this.floor = floor;
+    }
+
+    public String getRoomNumber() {
+        return roomNumber;
+    }
+
+    public void setRoomNumber(String roomNumber) {
+        this.roomNumber = roomNumber;
+    }
+
+    public List<String> getAmenities() {
+        return amenities;
+    }
+
+    public void setAmenities(List<String> amenities) {
+        this.amenities = amenities;
     }
 
     public ResourceStatus getStatus() {

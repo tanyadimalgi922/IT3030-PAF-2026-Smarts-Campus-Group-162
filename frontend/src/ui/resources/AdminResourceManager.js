@@ -1,6 +1,6 @@
 import ResourceBrowser from "./ResourceBrowser";
 
-function AdminResourceManager({ onCreate }) {
+function AdminResourceManager({ onCreate, onEdit }) {
   return (
     <section className="mt-8">
       <div className="glass-panel rounded-lg p-5 shadow-glow">
@@ -27,7 +27,7 @@ function AdminResourceManager({ onCreate }) {
         </div>
       </div>
 
-      <ResourceBrowser />
+      <ResourceBrowser adminMode onEdit={onEdit} />
     </section>
   );
 }
