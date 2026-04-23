@@ -1,5 +1,6 @@
 import DashboardLayout from "./DashboardLayout";
 import InfoCard from "./InfoCard";
+import AdminResourceManager from "../resources/AdminResourceManager";
 
 function AdminDashboard({ user, onLogout }) {
   return (
@@ -16,6 +17,7 @@ function AdminDashboard({ user, onLogout }) {
         <InfoCard label="Access" value="Users, resources, bookings, and incidents" />
         <InfoCard label="System" value="Smart Campus Operations Hub" />
       </div>
+      <AdminResourceManager />
     </DashboardLayout>
   );
 }

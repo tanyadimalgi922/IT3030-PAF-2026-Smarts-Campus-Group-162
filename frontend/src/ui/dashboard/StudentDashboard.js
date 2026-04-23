@@ -1,5 +1,6 @@
 import DashboardLayout from "./DashboardLayout";
 import InfoCard from "./InfoCard";
+import ResourceBrowser from "../resources/ResourceBrowser";
 
 function StudentDashboard({ user, onLogout }) {
   return (
@@ -16,6 +17,7 @@ function StudentDashboard({ user, onLogout }) {
         <InfoCard label="Faculty" value={user.faculty} />
         <InfoCard label="Access" value="Facilities and asset bookings" />
       </div>
+      <ResourceBrowser />
     </DashboardLayout>
   );
 }
