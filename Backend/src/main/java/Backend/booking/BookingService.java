@@ -196,7 +196,9 @@ public class BookingService {
         int pendingCount = sumAttendeesByStatus(matchingBookings, BookingStatus.PENDING);
         int bookedCount = sumAttendeesByStatus(matchingBookings, BookingStatus.APPROVED);
         int leftCount = Math.max(resource.getCapacity() - pendingCount - bookedCount, 0);
-        String state = leftCount > 0 ? "AVAILABLE" : "FULL";
+        boolean timeExpired = isSlotExpiredOrStarted(date, start);
+        boolean availableForRequest = leftCount > 0 && !timeExpired;
+        String state = availableForRequest ? "AVAILABLE" : "FULL";
 
         return new BookingSlotResponse(
                 date.toString(),
@@ -206,7 +208,7 @@ public class BookingService {
                 leftCount,
                 pendingCount,
                 bookedCount,
-                leftCount > 0
+                availableForRequest
         );
     }
 
@@ -284,6 +286,10 @@ public class BookingService {
             int expectedAttendees,
             String currentBookingId
     ) {
+        if (isSlotExpiredOrStarted(date, startTime)) {
+            throw new BookingConflictException("Selected slot has already started or expired.");
+        }
+
         List<ResourceBooking> matchingBookings = findMatchingSlotBookings(resource.getId(), date, startTime, endTime, currentBookingId);
         int pendingCount = sumAttendeesByStatus(matchingBookings, BookingStatus.PENDING);
         int bookedCount = sumAttendeesByStatus(matchingBookings, BookingStatus.APPROVED);
@@ -330,6 +336,19 @@ public class BookingService {
 
     private boolean overlaps(LocalTime start, LocalTime end, LocalTime otherStart, LocalTime otherEnd) {
         return start.isBefore(otherEnd) && end.isAfter(otherStart);
+    }
+
+    private boolean isSlotExpiredOrStarted(LocalDate date, LocalTime startTime) {
+        LocalDate today = LocalDate.now();
+        if (date.isBefore(today)) {
+            return true;
+        }
+
+        if (date.isAfter(today)) {
+            return false;
+        }
+
+        return !LocalTime.now().isBefore(startTime);
     }
 
     private LocalDate parseDate(String value, String message) {

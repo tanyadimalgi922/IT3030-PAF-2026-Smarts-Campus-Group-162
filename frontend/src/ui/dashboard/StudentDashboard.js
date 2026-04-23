@@ -57,7 +57,7 @@ function StudentDashboard({ user, onLogout, onNavigate, path }) {
             </div>
           </div>
 
-          <StudentBookingList user={user} />
+          <StudentBookingList onNavigate={onNavigate} user={user} />
         </section>
       </main>
     );

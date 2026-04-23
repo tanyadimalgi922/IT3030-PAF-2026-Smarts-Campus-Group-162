@@ -1,12 +1,8 @@
-import { useState } from "react";
 import CampusHeader from "../CampusHeader";
-import StudentBookingList from "../bookings/StudentBookingList";
 import CampusMapView from "../resources/CampusMapView";
 import ResourceBrowser from "../resources/ResourceBrowser";
 
 function StudentResourcesPage({ onBack, onLogout, onNavigate, user }) {
-  const [bookingRefreshKey, setBookingRefreshKey] = useState(0);
-
   const handleHeaderNavigate = (item) => {
     if (item === "Home") {
       onBack();
@@ -49,12 +45,7 @@ function StudentResourcesPage({ onBack, onLogout, onNavigate, user }) {
         </div>
 
         <CampusMapView />
-        <StudentBookingList refreshKey={bookingRefreshKey} user={user} />
-        <ResourceBrowser
-          bookingMode
-          onBooked={() => setBookingRefreshKey((current) => current + 1)}
-          user={user}
-        />
+        <ResourceBrowser bookingMode user={user} />
       </section>
     </main>
   );

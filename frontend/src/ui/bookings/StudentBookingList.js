@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { cancelBooking, getBookings } from "../../api/bookingApi";
 
-function StudentBookingList({ refreshKey = 0, user }) {
+function StudentBookingList({ onNavigate, refreshKey = 0, user }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -48,6 +48,21 @@ function StudentBookingList({ refreshKey = 0, user }) {
     }
   };
 
+  const handleReschedule = async (booking) => {
+    const confirmed = window.confirm(
+      "This will cancel the current approved booking and take you to Resources to request a new slot."
+    );
+    if (!confirmed) return;
+
+    try {
+      await cancelBooking(booking.id, "Cancelled to reschedule booking.", user.fullName);
+      setLocalRefreshKey((current) => current + 1);
+      onNavigate?.("/student/resources");
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  };
+
   return (
     <section className="mt-8">
       <div>
@@ -85,14 +100,24 @@ function StudentBookingList({ refreshKey = 0, user }) {
                     <p className="mt-2 text-sm font-semibold text-campus-navy">{booking.reviewReason}</p>
                   )}
                 </div>
-                <button
-                  className="min-h-10 rounded-md border border-amber-200 bg-amber-50 px-4 text-sm font-black text-amber-800 disabled:opacity-50"
-                  disabled={booking.status !== "APPROVED"}
-                  onClick={() => handleCancel(booking)}
-                  type="button"
-                >
-                  Cancel
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className="min-h-10 rounded-md border border-blue-200 bg-blue-50 px-4 text-sm font-black text-campus-blue disabled:opacity-50"
+                    disabled={booking.status !== "APPROVED"}
+                    onClick={() => handleReschedule(booking)}
+                    type="button"
+                  >
+                    Reschedule
+                  </button>
+                  <button
+                    className="min-h-10 rounded-md border border-amber-200 bg-amber-50 px-4 text-sm font-black text-amber-800 disabled:opacity-50"
+                    disabled={booking.status !== "APPROVED"}
+                    onClick={() => handleCancel(booking)}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </article>
           ))
