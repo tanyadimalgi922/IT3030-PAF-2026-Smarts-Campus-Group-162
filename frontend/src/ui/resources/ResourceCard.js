@@ -1,4 +1,6 @@
-function ResourceCard({ adminMode = false, onDelete, onEdit, resource }) {
+import StudentBookingPanel from "../bookings/StudentBookingPanel";
+
+function ResourceCard({ adminMode = false, bookingMode = false, onBooked, onDelete, onEdit, resource, user }) {
   const amenities = resource.amenities || [];
 
   return (
@@ -105,6 +107,10 @@ function ResourceCard({ adminMode = false, onDelete, onEdit, resource }) {
               Delete
             </button>
           </div>
+        )}
+
+        {bookingMode && resource.status === "ACTIVE" && (
+          <StudentBookingPanel onBooked={onBooked} resource={resource} user={user} />
         )}
       </div>
     </article>

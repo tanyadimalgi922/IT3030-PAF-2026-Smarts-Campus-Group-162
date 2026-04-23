@@ -3,6 +3,7 @@ import InfoCard from "./InfoCard";
 import ResourceTypeChart from "./ResourceTypeChart";
 import AdminResourceManager from "../resources/AdminResourceManager";
 import ResourceCreatePage from "../resources/ResourceCreatePage";
+import AdminBookingManager from "../bookings/AdminBookingManager";
 
 function AdminDashboard({ user, onLogout, onNavigate, path }) {
   const editMatch = path.match(/^\/admin\/resources\/edit\/(.+)$/);
@@ -74,14 +75,14 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
             <div className="grid grid-cols-2 gap-3">
               {[
                 ["Resources", () => onNavigate("/admin/resources/create")],
-                ["Bookings", null],
+                ["Bookings", () => document.getElementById("booking-review")?.scrollIntoView({ behavior: "smooth" })],
                 ["Reports", null],
                 ["Support", null],
               ].map(([label, action]) => (
                 <button
                   key={label}
                   className={`min-h-20 rounded-2xl border border-white/20 px-4 text-sm font-black transition ${
-                    label === "Resources" ? "bg-white text-campus-navy" : "bg-white/8 text-white hover:bg-white/14"
+                    ["Resources", "Bookings"].includes(label) ? "bg-white text-campus-navy" : "bg-white/8 text-white hover:bg-white/14"
                   }`}
                   onClick={action || undefined}
                   type="button"
@@ -97,6 +98,10 @@ function AdminDashboard({ user, onLogout, onNavigate, path }) {
           <InfoCard label="Admin name" value={user.fullName} />
           <InfoCard label="System area" value={user.specialization} />
           <InfoCard label="Workspace" value="Resources, bookings, and incidents" />
+        </div>
+
+        <div id="booking-review">
+          <AdminBookingManager user={user} />
         </div>
 
         <ResourceTypeChart />

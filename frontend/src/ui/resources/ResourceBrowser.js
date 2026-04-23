@@ -13,7 +13,7 @@ const resourceTypes = [
 const buildings = ["", "Main Academic Block", "Science Complex", "Engineering Block", "Library Building", "Sports Center"];
 const floors = ["", "Ground Floor", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"];
 
-function ResourceBrowser({ adminMode = false, onEdit, refreshKey = 0 }) {
+function ResourceBrowser({ adminMode = false, bookingMode = false, onBooked, onEdit, refreshKey = 0, user }) {
   const [filters, setFilters] = useState({
     search: "",
     type: "",
@@ -155,10 +155,16 @@ function ResourceBrowser({ adminMode = false, onEdit, refreshKey = 0 }) {
           resources.map((resource) => (
             <ResourceCard
               adminMode={adminMode}
+              bookingMode={bookingMode}
               key={resource.id}
+              onBooked={() => {
+                setLocalRefreshKey((current) => current + 1);
+                onBooked?.();
+              }}
               onDelete={() => handleDelete(resource)}
               onEdit={() => onEdit?.(resource.id)}
               resource={resource}
+              user={user}
             />
           ))
         ) : (
