@@ -877,12 +877,12 @@ function TicketCommentsSection({
             const isEditing = editingCommentId === comment.id;
 
             return (
-              <div className="rounded-2xl bg-white p-4 shadow-sm" key={comment.id}>
+              <div className={`rounded-2xl border p-4 shadow-sm ${commentRoleCardTone(comment.authorRole)}`} key={comment.id}>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-sm font-black text-campus-navy">
                       {comment.authorName}
-                      <span className="ml-2 rounded-full bg-slate-100 px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-slate-600">
+                      <span className={`ml-2 rounded-full px-2 py-1 text-[10px] uppercase tracking-[0.14em] ${commentRoleBadgeTone(comment.authorRole)}`}>
                         {formatLabel(comment.authorRole)}
                       </span>
                     </p>
@@ -1078,6 +1078,20 @@ function priorityTone(priority) {
   if (priority === "HIGH") return "bg-orange-50 text-orange-700";
   if (priority === "MEDIUM") return "bg-blue-50 text-blue-700";
   return "bg-emerald-50 text-emerald-700";
+}
+
+function commentRoleBadgeTone(role) {
+  if (role === "ADMIN") return "bg-violet-100 text-violet-700";
+  if (role === "TECHNICIAN") return "bg-sky-100 text-sky-700";
+  if (role === "STUDENT") return "bg-emerald-100 text-emerald-700";
+  return "bg-slate-100 text-slate-600";
+}
+
+function commentRoleCardTone(role) {
+  if (role === "ADMIN") return "border-violet-100 bg-violet-50/60";
+  if (role === "TECHNICIAN") return "border-sky-100 bg-sky-50/60";
+  if (role === "STUDENT") return "border-emerald-100 bg-emerald-50/60";
+  return "border-slate-100 bg-white";
 }
 
 function formatDateTime(value) {
